@@ -4,6 +4,7 @@ import (
 	"errors"
 	"siuji-backend/models"
 	"siuji-backend/repositories"
+	"siuji-backend/utils"
 
 	"github.com/google/uuid"
 )
@@ -108,12 +109,19 @@ func (s *periodService) UpdatePeriod(publicID string, req *models.PeriodRequest)
 	if period == nil {
 		return nil, errors.New("period not found")
 	}
+	if req.Status != "" {
+		if req.Status != utils.PeriodStatusDraft &&
+		   req.Status != utils.PeriodStatusPublished &&
+		   req.Status != utils.PeriodStatusClosed {
+			return nil, errors.New("invalid period status")
+		}
+		period.Status = req.Status
+	}
 
 	period.Title = req.Title
 	period.Month = req.Month
 	period.Year = req.Year
 	period.DueDate = req.DueDate
-	period.Status = req.Status
 	period.CertificateURL = req.CertificateURL
 	period.CertificateExpMonth = req.CertificateExpMonth
 	period.MinPassingGrade = req.MinPassingGrade

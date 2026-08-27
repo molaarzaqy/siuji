@@ -311,6 +311,11 @@ func (s *participantService) UpdateParticipant(periodPublicID, userPublicID stri
 	}
 	// Update data di tabel participant_periods (misal status atau score jika ada di request)
 	if req.Status != "" {
+		if req.Status != utils.ParticipantStatusRegistered &&
+			req.Status != utils.ParticipantStatusStarted &&
+			req.Status != utils.ParticipantStatusCompleted {
+				return nil, errors.New("invalid participant status.")
+			}
 		participantPeriod.Status = req.Status
 	}
 	if req.Score != nil {
