@@ -15,3 +15,40 @@ type PeriodSection struct {
 	Period  Period  `json:"period,omitempty" gorm:"foreignKey:PeriodID"`
 	Section Section `json:"section,omitempty" gorm:"foreignKey:SectionID"`
 }
+
+type PeriodSectionResponse struct {
+	PeriodSectionPublicID string `json:"period_section_public_id"`
+	SectionPublicID       string `json:"section_public_id"`
+	Title                 string `json:"title"`
+	Position              int    `json:"position"`
+}
+
+type ExamStartResponse struct {
+	PeriodPublicID string             `json:"period_public_id"`
+	Title          string             `json:"title"`
+	Sections       []SectionExamItem  `json:"sections"`
+}
+
+type SectionExamItem struct {
+	PublicID  string              `json:"public_id"`
+	Title     string              `json:"title"`
+	Position  int                 `json:"position"`
+	Questions []QuestionExamItem  `json:"questions"`
+}
+
+type QuestionExamItem struct {
+	PublicID  string             `json:"public_id"`
+	Question  string             `json:"question"`
+	AudioURL  *string            `json:"audio_url"`
+	ImageURL  *string            `json:"image_url"`
+	Passage   *string            `json:"passage"`
+	Position  int                `json:"position"`
+	Options   []OptionExamItem   `json:"options"`
+}
+
+type OptionExamItem struct {
+	PublicID   string `json:"public_id"`
+	Label      string `json:"label"`
+	OptionText string `json:"option_text"`
+	Position   int    `json:"position"`
+}

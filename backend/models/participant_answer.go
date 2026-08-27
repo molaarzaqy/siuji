@@ -17,3 +17,22 @@ type ParticipantAnswer struct {
 	Question          Question          `json:"question,omitempty" gorm:"foreignKey:QuestionID"`
 	Option            Option            `json:"option,omitempty" gorm:"foreignKey:OptionID"`
 }
+
+type SaveAnswerRequest struct {
+	QuestionPublicID string `json:"question_public_id" validate:"required"`
+	OptionPublicID   string `json:"option_public_id" validate:"required"`
+}
+
+// DTO untuk Response Body setelah jawaban berhasil disimpan
+type AnswerResponse struct {
+	QuestionPublicID string    `json:"question_public_id"`
+	OptionPublicID   string    `json:"option_public_id"`
+	UpdatedAt        time.Time `json:"updated_at"`
+}
+
+// DTO untuk Response Body saat peserta menekan tombol Submit Ujian
+type ExamSubmitResponse struct {
+	PeriodPublicID string    `json:"period_public_id"`
+	Status         string    `json:"status"` // "completed"
+	SubmittedAt    time.Time `json:"submitted_at"`
+}

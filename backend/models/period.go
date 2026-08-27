@@ -9,7 +9,7 @@ type Period struct {
 	Month               string    `json:"month" gorm:"type:varchar(50)"`
 	Year                int       `json:"year" gorm:"type:int"`
 	DueDate             time.Time `json:"due_date" gorm:"type:timestamp"`
-	Status              string    `json:"status" gorm:"type:varchar(50);not null"`
+	Status              string    `json:"status" gorm:"type:varchar(50);not null;default:'draft'"`
 	CertificateURL      string    `json:"certificate_url" gorm:"type:text"`
 	CertificateExpMonth time.Time `json:"certificate_exp_month" gorm:"type:timestamp"`
 	MinPassingGrade     int       `json:"min_passing_grade" gorm:"type:int"`
@@ -29,7 +29,7 @@ type PeriodRequest struct {
 	Month               string    `json:"month" validate:"required"`
 	Year                int       `json:"year" validate:"required"`
 	DueDate             time.Time `json:"due_date" validate:"required"`
-	Status              string    `json:"status"`
+	Status              string    `json:"status" validate:"required,oneof=draft published closed"`
 	CertificateURL      string    `json:"certificate_url"`
 	CertificateExpMonth time.Time `json:"certificate_exp_month"`
 	MinPassingGrade     int       `json:"min_passing_grade"`
@@ -54,11 +54,4 @@ type PeriodDetailResponse struct {
 	Sections        	[]PeriodSectionResponse `json:"sections"`
 	CreatedAt       	time.Time              	`json:"created_at"`
 	UpdatedAt       	time.Time              	`json:"updated_at"`
-}
-
-type PeriodSectionResponse struct {
-	PeriodSectionPublicID string `json:"period_section_public_id"`
-	SectionPublicID       string `json:"section_public_id"`
-	Title                 string `json:"title"`
-	Position              int    `json:"position"`
 }

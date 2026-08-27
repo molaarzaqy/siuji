@@ -63,3 +63,29 @@ type ParticipantResponse struct {
 	CreatedAt      time.Time    `json:"created_at"`
 	UpdatedAt      time.Time    `json:"updated_at"`
 }
+
+type ParticipantPeriodListResponse struct {
+	PublicID string              `json:"public_id"`
+	Period   PeriodItemResponse  `json:"period"`
+	Status   string              `json:"status"`
+	Score    *int            `json:"score"`
+}
+
+type PeriodItemResponse struct {
+	PublicID  string    `json:"public_id"`
+	Title     string    `json:"title"`
+	StartTime time.Time `json:"start_time"`
+	EndTime   time.Time `json:"end_time"`
+	Status    string    `json:"status"`
+}
+
+// DTO untuk detail single period participant
+type ParticipantPeriodDetailResponse struct {
+	PublicID          string    `json:"public_id"`
+	Title             string    `json:"title"`
+	Month             string    `json:"month"`
+	Year              int       `json:"year"`
+	StartTime         time.Time `json:"start_time"`
+	EndTime           time.Time `json:"end_time"`
+	ParticipantStatus string    `json:"participant_status"`
+}

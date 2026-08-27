@@ -8,7 +8,7 @@ type SectionScore struct {
 	ParticipantPeriodID uint      `json:"participant_period_id" gorm:"not null;index"`
 	SectionID           uint      `json:"section_id" gorm:"not null;index"`
 	CorrectCount        int       `json:"correct_count" gorm:"type:int;default:0"`
-	RawScore            float64   `json:"raw_score" gorm:"type:decimal(5,2);default:0"`
+	RawScore            int       `json:"raw_score" gorm:"type:int;default:0"`
 	ScaledScore         int       `json:"scaled_score" gorm:"type:int;default:0"`
 	CreatedAt           time.Time `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt           time.Time `json:"updated_at" gorm:"autoUpdateTime"`
