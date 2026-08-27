@@ -15,6 +15,8 @@ type ParticipantRepository interface {
 	Update(participantPeriod *models.ParticipantPeriod) error
 	RemoveFromPeriod(periodID uint, userID uint) error
 	FindByID(id uint) (*models.ParticipantPeriod, error)
+	UpdateStatus(id uint, status string) error
+	UpdateScore(id uint, score int) error
 	// participant side
 	FindByUserID(userID uint) ([]models.ParticipantPeriod, error)
 	FindByPeriodIDAndUserID(periodID, userID uint) (*models.ParticipantPeriod, error)
@@ -131,6 +133,16 @@ func (r *participantRepository) FindByID(id uint) (*models.ParticipantPeriod, er
 		return nil, err
 	}
 	return &participantPeriod, nil
+}
+
+func (r *participantRepository) UpdateStatus(id uint, status string) error {
+	return r.db.Model(&models.ParticipantPeriod{}).
+		Where("id = ?", id).
+		Update("status", status).Error
+}
+
+func (r *participantRepository) UpdateScore(id uint, score int) error {
+    return r.db.Model(&models.ParticipantPeriod{}).Where("id = ?", id).Update("score", score).Error
 }
 
 func (r *participantRepository) FindByUserID(userID uint) ([]models.ParticipantPeriod, error) {

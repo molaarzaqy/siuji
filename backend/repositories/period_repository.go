@@ -13,12 +13,14 @@ type PeriodRepository interface {
 	FindByPublicID(publicID string) (*models.Period, error)
 	Update(period *models.Period) error
 	Delete(publicID string) error
+	UpdateStatus(id uint, status string) error
 	// period - section management (pivot & relations)
 	AddSectionToPeriod(periodSection *models.PeriodSection) error
 	RemoveSectionFromPeriod(periodID uint, sectionID uint) error
 	GetMaxPositionInPeriod(periodID uint) (int, error)
 	UpdateSectionPositions(updates []SectionPositionUpdate) error
 	FindPeriodSection(periodID uint, sectionID uint) (*models.PeriodSection, error)
+	FindWithSectionsAndQuestions(publicID string) (*models.Period, error)
 }
 
 type SectionPositionUpdate struct {
@@ -93,6 +95,12 @@ func (r *periodRepository) Delete(publicID string) error {
 	})
 }
 
+func (r *periodRepository) UpdateStatus(id uint, status string) error {
+	return r.db.Model(&models.Period{}).
+		Where("id = ?", id).
+		Update("status", status).Error
+}
+
 func (r *periodRepository) AddSectionToPeriod(periodSection *models.PeriodSection) error {
 	return r.db.Create(periodSection).Error
 }
@@ -133,4 +141,20 @@ func (r *periodRepository) FindPeriodSection(periodID uint, sectionID uint) (*mo
 		return nil, err
 	}
 	return &periodSection, nil
+}
+
+func (r *periodRepository) FindWithSectionsAndQuestions(publicID string) (*models.Period, error) {
+    var period models.Period
+    err := r.db.
+        Preload("PeriodSections.Section.Questions.Options").
+        Where("public_id = ?", publicID).
+        First(&period).Error
+    
+    if err != nil {
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            return nil, nil
+        }
+        return nil, err
+    }
+    return &period, nil
 }
