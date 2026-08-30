@@ -1,252 +1,328 @@
-basePath: /
+basePath: /api/v1
 definitions:
-  controllers.ChangePasswordRequest:
+  model.AuthResponse:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: integer
+      refresh_token:
+        type: string
+      temp_token:
+        type: string
+      user:
+        $ref: '#/definitions/model.UserResponse'
+    type: object
+  model.ChangePasswordRequest:
     properties:
       confirm_new_password:
         type: string
       new_password:
+        minLength: 8
         type: string
       old_password:
         type: string
+    required:
+    - confirm_new_password
+    - new_password
+    - old_password
     type: object
-  controllers.ForgotPasswordRequest:
+  model.ForgotPasswordRequest:
     properties:
       email:
         type: string
+    required:
+    - email
     type: object
-  controllers.LoginRequest:
+  model.LoginRequest:
     properties:
       email:
         type: string
       password:
         type: string
+    required:
+    - email
+    - password
     type: object
-  controllers.ResetPasswordRequest:
+  model.ResetPasswordRequest:
     properties:
       confirm_new_password:
         type: string
       new_password:
+        minLength: 8
+        type: string
+    required:
+    - confirm_new_password
+    - new_password
+    type: object
+  model.UserResponse:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      nim:
+        type: string
+      public_id:
+        type: string
+      role:
+        type: string
+      university:
+        type: string
+      updated_at:
         type: string
     type: object
-  controllers.VerifyOTPRequest:
+  model.VerifyOTPRequest:
     properties:
       otp_code:
         type: string
+    required:
+    - otp_code
     type: object
-host: localhost:8080
+  response.Response:
+    properties:
+      data: {}
+      message:
+        type: string
+      response_code:
+        type: integer
+      status:
+        type: string
+    type: object
+  response.ResponseNoData:
+    properties:
+      message:
+        type: string
+      response_code:
+        type: integer
+      status:
+        type: string
+    type: object
 info:
-  contact:
-    email: support@example.com
-    name: Support Team
-  description: API Backend untuk aplikasi SIUJI
-  license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
-  termsOfService: http://swagger.io/terms/
-  title: SIUJI API Documentation
+  contact: {}
+  description: API documentation for Siuji TOEFL exam application.
+  title: Siuji API
   version: "1.0"
 paths:
-  /api/v1/auth/change-password:
+  /auth/change-password:
     post:
       consumes:
       - application/json
-      description: Change current user password by providing old and new password
+      description: Change password for the currently authenticated user.
       parameters:
       - description: Old and new password
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/controllers.ChangePasswordRequest'
+          $ref: '#/definitions/model.ChangePasswordRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: Password changed successfully
+          description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/response.Response'
         "400":
-          description: Change failed
+          description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/response.ResponseNoData'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
       summary: Change password
       tags:
       - Auth
-  /api/v1/auth/forgot-password:
+  /auth/forgot-password:
     post:
       consumes:
       - application/json
-      description: Send an OTP verification code to the registered email
+      description: Request an OTP code to be sent to the registered email for password
+        reset.
       parameters:
-      - description: User email
+      - description: Registered email
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/controllers.ForgotPasswordRequest'
+          $ref: '#/definitions/model.ForgotPasswordRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: OTP sent successfully
+          description: OK
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.AuthResponse'
+              type: object
         "400":
-          description: Invalid request
+          description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Request password reset OTP
+            $ref: '#/definitions/response.ResponseNoData'
+      summary: Forgot password
       tags:
       - Auth
-  /api/v1/auth/login:
+  /auth/login:
     post:
       consumes:
       - application/json
-      description: Authenticate user with email and password
+      description: Authenticate user with email and password, returns access & refresh
+        token.
       parameters:
       - description: Login credentials
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/controllers.LoginRequest'
+          $ref: '#/definitions/model.LoginRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: Successful login
+          description: OK
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.AuthResponse'
+              type: object
         "400":
-          description: Invalid request
+          description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/response.ResponseNoData'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties: true
-            type: object
-      summary: User login
+            $ref: '#/definitions/response.ResponseNoData'
+      summary: Login
       tags:
       - Auth
-  /api/v1/auth/logout:
+  /auth/logout:
     post:
-      description: Clear authentication cookies and log out user
+      description: Clear authentication cookies.
       produces:
       - application/json
       responses:
         "200":
-          description: Logout successful
+          description: OK
           schema:
-            additionalProperties: true
-            type: object
-      summary: User logout
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Logout
       tags:
       - Auth
-  /api/v1/auth/me:
+  /auth/me:
     get:
-      description: Retrieve logged-in user profile details
+      description: Get the profile of the currently authenticated user.
       produces:
       - application/json
       responses:
         "200":
-          description: User profile retrieved
+          description: OK
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.UserResponse'
+              type: object
         "401":
           description: Unauthorized
           schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: User not found
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Get current user profile
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Get current user
       tags:
       - Auth
-  /api/v1/auth/reset-password:
+  /auth/reset-password:
     post:
       consumes:
       - application/json
-      description: Reset user password using new password after OTP verification
+      description: Set a new password after OTP verification. Requires a temp token
+        (from verify-otp) in Authorization header.
       parameters:
-      - description: New password details
+      - description: New password
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/controllers.ResetPasswordRequest'
+          $ref: '#/definitions/model.ResetPasswordRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: Password reset successful
+          description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/response.ResponseNoData'
         "400":
-          description: Reset failed
+          description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/response.ResponseNoData'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - TempToken: []
       summary: Reset password
       tags:
       - Auth
-  /api/v1/auth/verify-otp:
+  /auth/verify-otp:
     post:
       consumes:
       - application/json
-      description: Verify the OTP code sent to email for password reset
+      description: Verify the OTP code sent to email. Requires a temp token (from
+        forgot-password) in Authorization header.
       parameters:
       - description: OTP code
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/controllers.VerifyOTPRequest'
+          $ref: '#/definitions/model.VerifyOTPRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: OTP verified successfully
+          description: OK
           schema:
-            additionalProperties: true
-            type: object
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.AuthResponse'
+              type: object
         "400":
-          description: Verification failed
+          description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/response.ResponseNoData'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties: true
-            type: object
-      summary: Verify OTP code
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - TempToken: []
+      summary: Verify OTP
       tags:
       - Auth
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT access token.
+    in: header
+    name: Authorization
+    type: apiKey
+  TempToken:
+    description: Type "Bearer" followed by a space and temp JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

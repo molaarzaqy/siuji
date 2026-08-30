@@ -9,23 +9,20 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "termsOfService": "http://swagger.io/terms/",
-        "contact": {
-            "name": "Support Team",
-            "email": "support@example.com"
-        },
-        "license": {
-            "name": "Apache 2.0",
-            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-        },
+        "contact": {},
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/v1/auth/change-password": {
+        "/auth/change-password": {
             "post": {
-                "description": "Change current user password by providing old and new password",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Change password for the currently authenticated user.",
                 "consumes": [
                     "application/json"
                 ],
@@ -43,38 +40,35 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controllers.ChangePasswordRequest"
+                            "$ref": "#/definitions/model.ChangePasswordRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Password changed successfully",
+                        "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "400": {
-                        "description": "Change failed",
+                        "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.ResponseNoData"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.ResponseNoData"
                         }
                     }
                 }
             }
         },
-        "/api/v1/auth/forgot-password": {
+        "/auth/forgot-password": {
             "post": {
-                "description": "Send an OTP verification code to the registered email",
+                "description": "Request an OTP code to be sent to the registered email for password reset.",
                 "consumes": [
                     "application/json"
                 ],
@@ -84,46 +78,49 @@ const docTemplate = `{
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Request password reset OTP",
+                "summary": "Forgot password",
                 "parameters": [
                     {
-                        "description": "User email",
+                        "description": "Registered email",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controllers.ForgotPasswordRequest"
+                            "$ref": "#/definitions/model.ForgotPasswordRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OTP sent successfully",
+                        "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.AuthResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
-                        "description": "Invalid request",
+                        "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.ResponseNoData"
                         }
                     }
                 }
             }
         },
-        "/api/v1/auth/login": {
+        "/auth/login": {
             "post": {
-                "description": "Authenticate user with email and password",
+                "description": "Authenticate user with email and password, returns access \u0026 refresh token.",
                 "consumes": [
                     "application/json"
                 ],
@@ -133,7 +130,7 @@ const docTemplate = `{
                 "tags": [
                     "Auth"
                 ],
-                "summary": "User login",
+                "summary": "Login",
                 "parameters": [
                     {
                         "description": "Login credentials",
@@ -141,94 +138,120 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controllers.LoginRequest"
+                            "$ref": "#/definitions/model.LoginRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successful login",
+                        "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.AuthResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
-                        "description": "Invalid request",
+                        "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.ResponseNoData"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.ResponseNoData"
                         }
                     }
                 }
             }
         },
-        "/api/v1/auth/logout": {
+        "/auth/logout": {
             "post": {
-                "description": "Clear authentication cookies and log out user",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Clear authentication cookies.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Auth"
                 ],
-                "summary": "User logout",
+                "summary": "Logout",
                 "responses": {
                     "200": {
-                        "description": "Logout successful",
+                        "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.ResponseNoData"
                         }
                     }
                 }
             }
         },
-        "/api/v1/auth/me": {
+        "/auth/me": {
             "get": {
-                "description": "Retrieve logged-in user profile details",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get the profile of the currently authenticated user.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Get current user profile",
+                "summary": "Get current user",
                 "responses": {
                     "200": {
-                        "description": "User profile retrieved",
+                        "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.UserResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "User not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.ResponseNoData"
                         }
                     }
                 }
             }
         },
-        "/api/v1/auth/reset-password": {
+        "/auth/reset-password": {
             "post": {
-                "description": "Reset user password using new password after OTP verification",
+                "security": [
+                    {
+                        "TempToken": []
+                    }
+                ],
+                "description": "Set a new password after OTP verification. Requires a temp token (from verify-otp) in Authorization header.",
                 "consumes": [
                     "application/json"
                 ],
@@ -241,43 +264,45 @@ const docTemplate = `{
                 "summary": "Reset password",
                 "parameters": [
                     {
-                        "description": "New password details",
+                        "description": "New password",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controllers.ResetPasswordRequest"
+                            "$ref": "#/definitions/model.ResetPasswordRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Password reset successful",
+                        "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.ResponseNoData"
                         }
                     },
                     "400": {
-                        "description": "Reset failed",
+                        "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.ResponseNoData"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.ResponseNoData"
                         }
                     }
                 }
             }
         },
-        "/api/v1/auth/verify-otp": {
+        "/auth/verify-otp": {
             "post": {
-                "description": "Verify the OTP code sent to email for password reset",
+                "security": [
+                    {
+                        "TempToken": []
+                    }
+                ],
+                "description": "Verify the OTP code sent to email. Requires a temp token (from forgot-password) in Authorization header.",
                 "consumes": [
                     "application/json"
                 ],
@@ -287,7 +312,7 @@ const docTemplate = `{
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Verify OTP code",
+                "summary": "Verify OTP",
                 "parameters": [
                     {
                         "description": "OTP code",
@@ -295,30 +320,39 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controllers.VerifyOTPRequest"
+                            "$ref": "#/definitions/model.VerifyOTPRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OTP verified successfully",
+                        "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.AuthResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
-                        "description": "Verification failed",
+                        "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.ResponseNoData"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.ResponseNoData"
                         }
                     }
                 }
@@ -326,30 +360,63 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "controllers.ChangePasswordRequest": {
+        "model.AuthResponse": {
             "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "expires_in": {
+                    "type": "integer"
+                },
+                "refresh_token": {
+                    "type": "string"
+                },
+                "temp_token": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/model.UserResponse"
+                }
+            }
+        },
+        "model.ChangePasswordRequest": {
+            "type": "object",
+            "required": [
+                "confirm_new_password",
+                "new_password",
+                "old_password"
+            ],
             "properties": {
                 "confirm_new_password": {
                     "type": "string"
                 },
                 "new_password": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 8
                 },
                 "old_password": {
                     "type": "string"
                 }
             }
         },
-        "controllers.ForgotPasswordRequest": {
+        "model.ForgotPasswordRequest": {
             "type": "object",
+            "required": [
+                "email"
+            ],
             "properties": {
                 "email": {
                     "type": "string"
                 }
             }
         },
-        "controllers.LoginRequest": {
+        "model.LoginRequest": {
             "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
             "properties": {
                 "email": {
                     "type": "string"
@@ -359,24 +426,101 @@ const docTemplate = `{
                 }
             }
         },
-        "controllers.ResetPasswordRequest": {
+        "model.ResetPasswordRequest": {
             "type": "object",
+            "required": [
+                "confirm_new_password",
+                "new_password"
+            ],
             "properties": {
                 "confirm_new_password": {
                     "type": "string"
                 },
                 "new_password": {
+                    "type": "string",
+                    "minLength": 8
+                }
+            }
+        },
+        "model.UserResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "nim": {
+                    "type": "string"
+                },
+                "public_id": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "university": {
+                    "type": "string"
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }
         },
-        "controllers.VerifyOTPRequest": {
+        "model.VerifyOTPRequest": {
             "type": "object",
+            "required": [
+                "otp_code"
+            ],
             "properties": {
                 "otp_code": {
                     "type": "string"
                 }
             }
+        },
+        "response.Response": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "message": {
+                    "type": "string"
+                },
+                "response_code": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.ResponseNoData": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "response_code": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "Type \"Bearer\" followed by a space and JWT access token.",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        },
+        "TempToken": {
+            "description": "Type \"Bearer\" followed by a space and temp JWT token.",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`
@@ -384,11 +528,11 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
-	BasePath:         "/",
+	Host:             "",
+	BasePath:         "/api/v1",
 	Schemes:          []string{},
-	Title:            "SIUJI API Documentation",
-	Description:      "API Backend untuk aplikasi SIUJI",
+	Title:            "Siuji API",
+	Description:      "API documentation for Siuji TOEFL exam application.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
