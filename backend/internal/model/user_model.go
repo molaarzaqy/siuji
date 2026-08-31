@@ -9,5 +9,6 @@ type UserResponse struct {
 	Role       string    `json:"role"`
 	NIM        string    `json:"nim,omitempty"`
 	University string    `json:"university,omitempty"`
+	CreatedAt  time.Time `json:"created_at,omitempty"`
 	UpdatedAt  time.Time `json:"updated_at,omitempty"`
 }
