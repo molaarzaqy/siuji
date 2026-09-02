@@ -15,6 +15,7 @@ type Section struct {
 
 	// Relations
 	PeriodSections []PeriodSection `gorm:"foreignKey:SectionID"`
+	Questions []Question `gorm:"foreignKey:SectionID"`
 }
 
 func (Section) TableName() string {
