@@ -98,3 +98,11 @@ func (c *SectionUseCase) Delete(publicID string) error {
 	}
 	return nil
 }
+
+func (c *SectionUseCase) GetDetail(publicID string) (*model.SectionDetailResponse, error) {
+	section, err := c.SectionRepository.FindByPublicIDWithQuestions(publicID)
+	if err != nil {
+		return nil, fiber.NewError(fiber.StatusNotFound, "section not found")
+	}
+	return converter.SectionToDetailResponse(section), nil
+}

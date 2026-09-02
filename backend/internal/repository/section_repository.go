@@ -11,6 +11,7 @@ import (
 type SectionRepository interface {
 	Create(section *entity.Section) error
 	FindByPublicID(publicID string) (*entity.Section, error)
+	FindByPublicIDWithQuestions(publicID string) (*entity.Section, error)
 	FindAll() ([]entity.Section, error)
 	Update(section *entity.Section) error
 	Delete(publicID string) error
@@ -31,6 +32,27 @@ func (r *sectionRepository) Create(section *entity.Section) error {
 func (r *sectionRepository) FindByPublicID(publicID string) (*entity.Section, error) {
 	var section entity.Section
 	err := r.db.Where("public_id = ?", publicID).First(&section).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("section not found")
+		}
+		return nil, err
+	}
+	return &section, nil
+}
+
+func (r *sectionRepository) FindByPublicIDWithQuestions(publicID string) (*entity.Section, error) {
+	var section entity.Section
+	err := r.db.
+		Preload("Questions", func(db *gorm.DB) *gorm.DB {
+			return db.Order("questions.position ASC")
+		}).
+		Preload("Questions.Options", func(db *gorm.DB) *gorm.DB {
+			return db.Order("options.position ASC")
+		}).
+		Preload("Questions.AnswerKeys.Option").
+		Where("public_id = ?", publicID).
+		First(&section).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("section not found")
