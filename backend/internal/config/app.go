@@ -32,6 +32,9 @@ func Bootstrap(config *BootstrapConfig) {
 	sectionRepository := repository.NewSectionRepository(config.DB)
 	periodSectionRepository := repository.NewPeriodSectionRepository(config.DB)
 	participantPeriodRepository := repository.NewParticipantPeriodRepository(config.DB)
+	questionRepository := repository.NewQuestionRepository(config.DB)
+	optionRepository := repository.NewOptionRepository(config.DB)
+	answerKeyRepository := repository.NewAnswerKeyRepository(config.DB)
 
 	// setup external services
 	emailService := email.NewService()
@@ -42,6 +45,9 @@ func Bootstrap(config *BootstrapConfig) {
 	sectionUseCase := usecase.NewSectionUseCase(config.Log, config.Validate, sectionRepository)
 	userUseCase := usecase.NewUserUseCase(config.Log, userRepository)
 	participantUseCase := usecase.NewParticipantUseCase(config.Log, config.Validate, participantPeriodRepository, userRepository, periodRepository)
+	questionUseCase := usecase.NewQuestionUseCase(config.Log, config.Validate, questionRepository, sectionRepository)
+	optionUseCase := usecase.NewOptionUseCase(config.Log, config.Validate, optionRepository, questionRepository)
+	answerKeyUseCase := usecase.NewAnswerKeyUseCase(config.Log, config.Validate, answerKeyRepository, questionRepository, optionRepository)
 
 	// setup controllers
 	authController := http.NewAuthController(authUseCase)
@@ -49,6 +55,9 @@ func Bootstrap(config *BootstrapConfig) {
 	sectionController := http.NewSectionController(sectionUseCase)
 	userController := http.NewUserController(userUseCase)
 	participantController := http.NewParticipantController(participantUseCase)
+	questionController := http.NewQuestionController(questionUseCase)
+	optionController := http.NewOptionController(optionUseCase)
+	answerKeyController := http.NewAnswerKeyController(answerKeyUseCase)
 
 	// setup routes
 	routeConfig := route.RouteConfig{
@@ -56,6 +65,9 @@ func Bootstrap(config *BootstrapConfig) {
 		AuthController: authController,
 		PeriodController:       periodController,
 		SectionController:      sectionController,
+		QuestionController:     questionController,
+		OptionController:       optionController,
+		AnswerKeyController:    answerKeyController,
 		UserController:         userController,
 		ParticipantController:  participantController,
 		JWTManager:     config.JWTManager,

@@ -15,6 +15,9 @@ type RouteConfig struct {
 	AuthController *http.AuthController
 	PeriodController      *http.PeriodController
 	SectionController     *http.SectionController
+	QuestionController 	  *http.QuestionController
+	OptionController 	  *http.OptionController
+	AnswerKeyController	  *http.AnswerKeyController
 	ParticipantController *http.ParticipantController
 	UserController        *http.UserController
 	JWTManager     *jwt.Manager
@@ -26,6 +29,8 @@ func (r *RouteConfig) Setup() {
 	r.setupAuthRoutes()
 	r.setupPeriodRoutes()
 	r.setupSectionRoutes()
+	r.setupQuestionRoutes()
+	r.setupOptionRoutes()
 	r.setupUserRoutes()
 }
 
@@ -79,6 +84,34 @@ func (r *RouteConfig) setupSectionRoutes() {
 	sections.Get("/:section_public_id", r.SectionController.GetDetail)
 	sections.Put("/:section_public_id", r.SectionController.Update)
 	sections.Delete("/:section_public_id", r.SectionController.Delete)
+
+	sections.Post("/:section_public_id/questions", r.QuestionController.Create)
+	sections.Put("/:section_public_id/questions/reorder", r.QuestionController.Reorder)
+}
+
+func (r *RouteConfig) setupQuestionRoutes() {
+	questions := r.App.Group("/api/v1/questions",
+		middleware.JWTAuth(r.JWTManager, r.Log),
+		middleware.RequireRole("admin"),
+	)
+
+	questions.Get("/:question_public_id", r.QuestionController.GetDetail)
+	questions.Put("/:question_public_id", r.QuestionController.Update)
+	questions.Delete("/:question_public_id", r.QuestionController.Delete)
+
+	questions.Put("/:question_public_id/answer-key", r.AnswerKeyController.Upsert)
+	questions.Put("/:question_public_id/options/reorder", r.OptionController.Reorder)
+	questions.Post("/:question_public_id/options", r.OptionController.Create)
+}
+
+func (r *RouteConfig) setupOptionRoutes() {
+	options := r.App.Group("/api/v1/options",
+		middleware.JWTAuth(r.JWTManager, r.Log),
+		middleware.RequireRole("admin"),
+	)
+
+	options.Put("/:option_public_id", r.OptionController.Update)
+	options.Delete("/:option_public_id", r.OptionController.Delete)
 }
 
 func (r *RouteConfig) setupUserRoutes() {

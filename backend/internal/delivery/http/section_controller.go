@@ -37,7 +37,7 @@ func (ctrl *SectionController) GetAll(c fiber.Ctx) error {
 }
 
 func (ctrl *SectionController) GetDetail(c fiber.Ctx) error {
-	result, err := ctrl.UseCase.GetByPublicID(c.Params("section_public_id"))
+	result, err := ctrl.UseCase.GetDetail(c.Params("section_public_id"))
 	if err != nil {
 		return err
 	}
