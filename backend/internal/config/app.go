@@ -5,6 +5,7 @@ import (
 	"siuji-backend/internal/delivery/http/route"
 	"siuji-backend/internal/repository"
 	"siuji-backend/internal/usecase"
+	"siuji-backend/pkg/cloudinary"
 	"siuji-backend/pkg/email"
 	"siuji-backend/pkg/jwt"
 
@@ -22,6 +23,7 @@ type BootstrapConfig struct {
 	Validate   *validator.Validate
 	Config     *viper.Viper
 	JWTManager *jwt.Manager
+	CloudinaryService *cloudinary.Service
 }
 
 func Bootstrap(config *BootstrapConfig) {
@@ -41,11 +43,11 @@ func Bootstrap(config *BootstrapConfig) {
 
 	// setup usecases
 	authUseCase := usecase.NewAuthUseCase(config.Log, config.Validate, userRepository, otpRepository, emailService, config.JWTManager)
-	periodUseCase := usecase.NewPeriodUseCase(config.Log, config.Validate, periodRepository, sectionRepository, periodSectionRepository)
+	periodUseCase := usecase.NewPeriodUseCase(config.Log, config.Validate, periodRepository, sectionRepository, periodSectionRepository, config.CloudinaryService)
 	sectionUseCase := usecase.NewSectionUseCase(config.Log, config.Validate, sectionRepository)
 	userUseCase := usecase.NewUserUseCase(config.Log, userRepository)
 	participantUseCase := usecase.NewParticipantUseCase(config.Log, config.Validate, participantPeriodRepository, userRepository, periodRepository)
-	questionUseCase := usecase.NewQuestionUseCase(config.Log, config.Validate, questionRepository, sectionRepository)
+	questionUseCase := usecase.NewQuestionUseCase(config.Log, config.Validate, questionRepository, sectionRepository, config.CloudinaryService)
 	optionUseCase := usecase.NewOptionUseCase(config.Log, config.Validate, optionRepository, questionRepository)
 	answerKeyUseCase := usecase.NewAnswerKeyUseCase(config.Log, config.Validate, answerKeyRepository, questionRepository, optionRepository)
 

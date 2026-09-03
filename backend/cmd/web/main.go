@@ -25,6 +25,7 @@ func main() {
 	validate := config.NewValidator(viperConfig)
 	app := config.NewFiber(viperConfig)
 	jwtManager := config.NewJWTManager(viperConfig, log)
+	cloudinaryService := config.NewCloudinary(viperConfig)
 
 	config.Bootstrap(&config.BootstrapConfig{
 		DB: db,
@@ -33,6 +34,7 @@ func main() {
 		Validate: validate,
 		Config: viperConfig,
 		JWTManager: jwtManager,
+		CloudinaryService: cloudinaryService,
 	})
 
 	port := viperConfig.GetString("PORT")
