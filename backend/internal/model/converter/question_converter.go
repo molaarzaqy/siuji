@@ -12,7 +12,7 @@ func QuestionToResponse(question *entity.Question) *model.QuestionResponse {
 		AudioURL: question.AudioURL,
 		ImageURL: question.ImageURL,
 		Passage:  question.Passage,
-		Position: question.Position,
+		Number:   question.Number,
 	}
 }
 

@@ -5,6 +5,7 @@ import (
 
 	"siuji-backend/internal/entity"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -12,10 +13,10 @@ type QuestionRepository interface {
 	Create(question *entity.Question) error
 	FindByPublicID(publicID string) (*entity.Question, error)
 	FindByPublicIDWithOptions(publicID string) (*entity.Question, error)
-	GetMaxPositionInSection(sectionID uint) (int, error)
+	GetMaxNumberInSection(sectionID uint) (int, error)
 	Update(question *entity.Question) error
 	Delete(publicID string) error
-	UpdatePositionsByPublicIDs(publicIDs []string) error
+	UpdateNumbersByPublicIDs(publicIDs []string) error
 }
 
 type questionRepository struct {
@@ -31,8 +32,13 @@ func (r *questionRepository) Create(question *entity.Question) error {
 }
 
 func (r *questionRepository) FindByPublicID(publicID string) (*entity.Question, error) {
+	parsedID, err := uuid.Parse(publicID)
+	if err != nil {
+		return nil, errors.New("invalid uuid format")
+	}
+
 	var question entity.Question
-	err := r.db.Where("public_id = ?", publicID).First(&question).Error
+	err = r.db.Where("public_id = ?", parsedID).First(&question).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("question not found")
@@ -43,13 +49,18 @@ func (r *questionRepository) FindByPublicID(publicID string) (*entity.Question, 
 }
 
 func (r *questionRepository) FindByPublicIDWithOptions(publicID string) (*entity.Question, error) {
+	parsedID, err := uuid.Parse(publicID)
+	if err != nil {
+		return nil, errors.New("invalid uuid format")
+	}
+
 	var question entity.Question
-	err := r.db.
+	err = r.db.
 		Preload("Options", func(db *gorm.DB) *gorm.DB {
 			return db.Order("options.position ASC")
 		}).
 		Preload("AnswerKeys.Option").
-		Where("public_id = ?", publicID).
+		Where("public_id = ?", parsedID).
 		First(&question).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -60,13 +71,13 @@ func (r *questionRepository) FindByPublicIDWithOptions(publicID string) (*entity
 	return &question, nil
 }
 
-func (r *questionRepository) GetMaxPositionInSection(sectionID uint) (int, error) {
-	var maxPosition int
+func (r *questionRepository) GetMaxNumberInSection(sectionID uint) (int, error) {
+	var maxNumber int
 	err := r.db.Model(&entity.Question{}).
 		Where("section_id = ?", sectionID).
-		Select("COALESCE(MAX(position), 0)").
-		Scan(&maxPosition).Error
-	return maxPosition, err
+		Select("COALESCE(MAX(number), 0)").
+		Scan(&maxNumber).Error
+	return maxNumber, err
 }
 
 func (r *questionRepository) Update(question *entity.Question) error {
@@ -74,7 +85,12 @@ func (r *questionRepository) Update(question *entity.Question) error {
 }
 
 func (r *questionRepository) Delete(publicID string) error {
-	result := r.db.Where("public_id = ?", publicID).Delete(&entity.Question{})
+	parsedID, err := uuid.Parse(publicID)
+	if err != nil {
+		return errors.New("invalid uuid format")
+	}
+
+	result := r.db.Where("public_id = ?", parsedID).Delete(&entity.Question{})
 	if result.Error != nil {
 		return result.Error
 	}
@@ -84,12 +100,21 @@ func (r *questionRepository) Delete(publicID string) error {
 	return nil
 }
 
-func (r *questionRepository) UpdatePositionsByPublicIDs(publicIDs []string) error {
+func (r *questionRepository) UpdateNumbersByPublicIDs(publicIDs []string) error {
+	parsedIDs := make([]uuid.UUID, len(publicIDs))
+	for i, idStr := range publicIDs {
+		parsedID, err := uuid.Parse(idStr)
+		if err != nil {
+			return errors.New("invalid uuid format")
+		}
+		parsedIDs[i] = parsedID
+	}
+
 	return r.db.Transaction(func(tx *gorm.DB) error {
-		for index, publicID := range publicIDs {
+		for index, parsedID := range parsedIDs {
 			result := tx.Model(&entity.Question{}).
-				Where("public_id = ?", publicID).
-				Update("position", index+1)
+				Where("public_id = ?", parsedID).
+				Update("number", index+1)
 			if result.Error != nil {
 				return result.Error
 			}

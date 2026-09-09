@@ -5,6 +5,7 @@ import (
 
 	"siuji-backend/internal/entity"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -15,6 +16,7 @@ type ParticipantPeriodRepository interface {
 	FindAllByPeriodIDPagination(periodID uint, filter, sort string, limit, offset int) ([]entity.ParticipantPeriod, int64, error)
 	Update(pp *entity.ParticipantPeriod) error
 	DeleteByPeriodAndUserPublicID(periodID uint, userPublicID string) error
+	BulkCreate(list []entity.ParticipantPeriod) error
 }
 
 type participantPeriodRepository struct {
@@ -38,11 +40,16 @@ func (r *participantPeriodRepository) ExistsByPeriodAndUser(periodID, userID uin
 }
 
 func (r *participantPeriodRepository) FindByPeriodAndUserPublicID(periodID uint, userPublicID string) (*entity.ParticipantPeriod, error) {
+	parsedID, err := uuid.Parse(userPublicID)
+	if err != nil {
+		return nil, errors.New("invalid uuid format")
+	}
+
 	var pp entity.ParticipantPeriod
-	err := r.db.
+	err = r.db.
 		Preload("User").
 		Joins("JOIN users ON users.id = participant_periods.user_id").
-		Where("participant_periods.period_id = ? AND users.public_id = ?", periodID, userPublicID).
+		Where("participant_periods.period_id = ? AND users.public_id = ?", periodID, parsedID).
 		First(&pp).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -104,8 +111,13 @@ func (r *participantPeriodRepository) Update(pp *entity.ParticipantPeriod) error
 }
 
 func (r *participantPeriodRepository) DeleteByPeriodAndUserPublicID(periodID uint, userPublicID string) error {
+	parsedID, err := uuid.Parse(userPublicID)
+	if err != nil {
+		return errors.New("invalid uuid format")
+	}
+
 	result := r.db.
-		Where("period_id = ? AND user_id = (SELECT id FROM users WHERE public_id = ?)", periodID, userPublicID).
+		Where("period_id = ? AND user_id = (SELECT id FROM users WHERE public_id = ?)", periodID, parsedID).
 		Delete(&entity.ParticipantPeriod{})
 	if result.Error != nil {
 		return result.Error
@@ -114,4 +126,11 @@ func (r *participantPeriodRepository) DeleteByPeriodAndUserPublicID(periodID uin
 		return errors.New("participant not found in this period")
 	}
 	return nil
+}
+
+func (r *participantPeriodRepository) BulkCreate(list []entity.ParticipantPeriod) error {
+	if len(list) == 0 {
+		return nil
+	}
+	return r.db.Create(&list).Error
 }

@@ -1,16 +1,19 @@
 package usecase
 
 import (
+	"io"
 	"siuji-backend/internal/entity"
 	"siuji-backend/internal/model"
 	"siuji-backend/internal/model/converter"
 	"siuji-backend/internal/repository"
 	"siuji-backend/pkg/password"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
+	"github.com/xuri/excelize/v2"
 )
 
 type ParticipantUseCase struct {
@@ -191,4 +194,128 @@ func (c *ParticipantUseCase) Remove(periodPublicID, userPublicID string) error {
 		return fiber.NewError(fiber.StatusNotFound, "participant not found in this period")
 	}
 	return nil
+}
+
+func (c *ParticipantUseCase) ImportFromExcel(periodPublicID string, file io.Reader) (*model.ImportParticipantResponse, error) {
+	period, err := c.PeriodRepository.FindByPublicID(periodPublicID)
+	if err != nil {
+		return nil, fiber.NewError(fiber.StatusNotFound, "period not found")
+	}
+	xlsx, err := excelize.OpenReader(file)
+	if err != nil {
+		return nil, fiber.NewError(fiber.StatusBadRequest, "failed to read excel file")
+	}
+	defer xlsx.Close()
+
+	sheetName := xlsx.GetSheetName(0)
+	rows, err := xlsx.GetRows(sheetName)
+	if err != nil {
+		return nil, fiber.NewError(fiber.StatusBadRequest, "failed to read rows from excel")
+	}
+
+	var participantsToAssign []entity.ParticipantPeriod
+	var totalImported, totalSkipped int
+	var errorDetails []model.ImportErrorDetail
+	seenUserIDs := make(map[uint]bool)
+
+	for i, row := range rows {
+		if i == 0 {
+			continue
+		}
+		if len(row) < 4 {
+			totalSkipped++
+			errorDetails = append(errorDetails, model.ImportErrorDetail{
+				Row: i + 1, Email: "N/A",
+				Message: "incomplete row columns (expected: Name, Email, NIM, University).",
+			})
+			continue
+		}
+		name := strings.TrimSpace(row[0])
+		email := strings.TrimSpace(row[1])
+		nim := strings.TrimSpace(row[2])
+		university := strings.TrimSpace(row[3])
+
+		if email == "" || !strings.Contains(email, "@") {
+			totalSkipped++
+			errorDetails = append(errorDetails, model.ImportErrorDetail{
+				Row: i + 1, Email: email, Message: "invalid or empty email format.",
+			})
+			continue
+		}
+
+		user, err := c.UserRepository.FindByEmail(email)
+		if err != nil {
+			hashed, err := password.Hash(nim)
+			if err != nil {
+				totalSkipped++
+				errorDetails = append(errorDetails, model.ImportErrorDetail{
+					Row: i + 1, Email: email, Message: "failed to hash password for new user.",
+				})
+				continue
+			}
+
+			user = &entity.User{
+				PublicID: uuid.New(),
+				Name: name,
+				Email: email,
+				Password: hashed,
+				Role: "participant",
+				NIM: nim,
+				University: university,
+			}
+			if err := c.UserRepository.Create(user); err != nil {
+				totalSkipped++
+				errorDetails = append(errorDetails, model.ImportErrorDetail{
+					Row: i + 1, Email: email, Message: "Failed to create user in database.",
+				})
+				continue
+			}
+		}
+
+		if seenUserIDs[user.ID] {
+			totalSkipped++
+			errorDetails = append(errorDetails, model.ImportErrorDetail{
+				Row: i + 1, Email: email, Message: "Duplicate email within this Excel file.",
+			})
+			continue
+		}
+
+		exists, err := c.ParticipantPeriodRepository.ExistsByPeriodAndUser(period.ID, user.ID)
+		if err != nil {
+			totalSkipped++
+			errorDetails = append(errorDetails, model.ImportErrorDetail{
+				Row: i + 1, Email: email, Message: "Failed to check existing participant.",
+			})
+			continue
+		}
+		if exists {
+			totalSkipped++
+			errorDetails = append(errorDetails, model.ImportErrorDetail{
+				Row: i + 1, Email: email, Message: "Participant already registered in this period.",
+			})
+			continue
+		}
+
+		participantsToAssign = append(participantsToAssign, entity.ParticipantPeriod{
+			PublicID: uuid.New(),
+			UserID:   user.ID,
+			PeriodID: period.ID,
+			Status:   "registered",
+		})
+		seenUserIDs[user.ID] = true
+		totalImported++
+	}
+
+	if len(participantsToAssign) > 0 {
+		if err := c.ParticipantPeriodRepository.BulkCreate(participantsToAssign); err != nil {
+			c.Log.Errorf("failed to bulk assign participants: %+v", err)
+			return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to bulk assign participants to period")
+		}
+	}
+
+	return &model.ImportParticipantResponse{
+		TotalImported: totalImported,
+		TotalSkipped:  totalSkipped,
+		Errors:        errorDetails,
+	}, nil
 }

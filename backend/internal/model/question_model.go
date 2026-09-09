@@ -2,8 +2,6 @@ package model
 
 type QuestionRequest struct {
 	Question string  `json:"question" validate:"required"`
-	AudioURL *string `json:"audio_url"`
-	ImageURL *string `json:"image_url"`
 	Passage  *string `json:"passage"`
 }
 
@@ -13,7 +11,7 @@ type QuestionResponse struct {
 	AudioURL *string `json:"audio_url,omitempty"`
 	ImageURL *string `json:"image_url,omitempty"`
 	Passage  *string `json:"passage,omitempty"`
-	Position int     `json:"position"`
+	Number   int     `json:"number"`
 }
 
 type QuestionDetailResponse struct {

@@ -5,6 +5,7 @@ import (
 
 	"siuji-backend/internal/entity"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -30,8 +31,13 @@ func (r *sectionRepository) Create(section *entity.Section) error {
 }
 
 func (r *sectionRepository) FindByPublicID(publicID string) (*entity.Section, error) {
+	parsedID, err := uuid.Parse(publicID)
+	if err != nil {
+		return nil, errors.New("invalid uuid format")
+	}
+
 	var section entity.Section
-	err := r.db.Where("public_id = ?", publicID).First(&section).Error
+	err = r.db.Where("public_id = ?", parsedID).First(&section).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("section not found")
@@ -42,16 +48,21 @@ func (r *sectionRepository) FindByPublicID(publicID string) (*entity.Section, er
 }
 
 func (r *sectionRepository) FindByPublicIDWithQuestions(publicID string) (*entity.Section, error) {
+	parsedID, err := uuid.Parse(publicID)
+	if err != nil {
+		return nil, errors.New("invalid uuid format")
+	}
+
 	var section entity.Section
-	err := r.db.
+	err = r.db.
 		Preload("Questions", func(db *gorm.DB) *gorm.DB {
-			return db.Order("questions.position ASC")
+			return db.Order("questions.number ASC")
 		}).
 		Preload("Questions.Options", func(db *gorm.DB) *gorm.DB {
 			return db.Order("options.position ASC")
 		}).
 		Preload("Questions.AnswerKeys.Option").
-		Where("public_id = ?", publicID).
+		Where("public_id = ?", parsedID).
 		First(&section).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -73,7 +84,12 @@ func (r *sectionRepository) Update(section *entity.Section) error {
 }
 
 func (r *sectionRepository) Delete(publicID string) error {
-	result := r.db.Where("public_id = ?", publicID).Delete(&entity.Section{})
+	parsedID, err := uuid.Parse(publicID)
+	if err != nil {
+		return errors.New("invalid uuid format")
+	}
+
+	result := r.db.Where("public_id = ?", parsedID).Delete(&entity.Section{})
 	if result.Error != nil {
 		return result.Error
 	}

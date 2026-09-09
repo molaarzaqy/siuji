@@ -26,3 +26,15 @@ type ParticipantResponse struct {
 	CreatedAt      time.Time    `json:"created_at"`
 	UpdatedAt      time.Time    `json:"updated_at,omitempty"`
 }
+
+type ImportParticipantResponse struct {
+	TotalImported int 				  `json:"total_imported"`
+	TotalSkipped  int 				  `json:"total_skipped"`
+	Errors		  []ImportErrorDetail `json:"errors"`
+}
+
+type ImportErrorDetail struct {
+	Row		int    `json:"row"`
+	Email 	string `json:"email"`
+	Message string `json:"message"`
+}

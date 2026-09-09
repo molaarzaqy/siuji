@@ -67,6 +67,7 @@ func (r *RouteConfig) setupPeriodRoutes() {
 	periods.Put("/:period_public_id/sections/reorder", r.PeriodController.ReorderSections)
 
 	periods.Post("/:period_public_id/participants", r.ParticipantController.Add)
+	periods.Post("/:period_public_id/participants/import", r.ParticipantController.Import)
 	periods.Get("/:period_public_id/participants", r.ParticipantController.GetAll)
 	periods.Get("/:period_public_id/participants/:user_public_id", r.ParticipantController.GetDetail)
 	periods.Put("/:period_public_id/participants/:user_public_id", r.ParticipantController.Update)

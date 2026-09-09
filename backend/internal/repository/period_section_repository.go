@@ -5,6 +5,7 @@ import (
 
 	"siuji-backend/internal/entity"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -32,9 +33,14 @@ func (r *periodSectionRepository) Create(ps *entity.PeriodSection) error {
 }
 
 func (r *periodSectionRepository) FindByPublicID(publicID string) (*entity.PeriodSection, error) {
+	parsedID, err := uuid.Parse(publicID)
+	if err != nil {
+		return nil, errors.New("invalid uuid format")
+	}
+
 	var ps entity.PeriodSection
-	err := r.db.Preload("Section").Preload("Period").
-		Where("public_id = ?", publicID).First(&ps).Error
+	err = r.db.Preload("Section").Preload("Period").
+		Where("public_id = ?", parsedID).First(&ps).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("period section not found")
@@ -62,8 +68,13 @@ func (r *periodSectionRepository) ExistsByPeriodAndSection(periodID, sectionID u
 }
 
 func (r *periodSectionRepository) UpdatePosition(publicID string, position int) error {
+	parsedID, err := uuid.Parse(publicID)
+	if err != nil {
+		return errors.New("invalid uuid format")
+	}
+
 	result := r.db.Model(&entity.PeriodSection{}).
-		Where("public_id = ?", publicID).
+		Where("public_id = ?", parsedID).
 		Update("position", position)
 	if result.Error != nil {
 		return result.Error

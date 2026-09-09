@@ -20,3 +20,20 @@ type Option struct {
 func (Option) TableName() string {
 	return "options"
 }
+
+// LabelFromPosition derives an alphabetical option label (A, B, C, ...) from
+// a 1-indexed position, so labels always stay consistent with position —
+// no more manual labels drifting out of sync after a reorder.
+// Wraps to AA, AB, ... beyond Z (unlikely in practice for exam options).
+func LabelFromPosition(position int) string {
+	if position < 1 {
+		position = 1
+	}
+	label := ""
+	for position > 0 {
+		position--
+		label = string(rune('A'+(position%26))) + label
+		position /= 26
+	}
+	return label
+}

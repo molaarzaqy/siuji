@@ -80,3 +80,27 @@ func (ctrl *ParticipantController) Remove(c fiber.Ctx) error {
 	}
 	return response.SuccessNoData(c, "Participant removed from period successfully.")
 }
+
+func (ctrl *ParticipantController) Import(c fiber.Ctx) error {
+	fileHeader, err := c.FormFile("file")
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "excel file is required (field name: file)")
+	}
+
+	contentType := fileHeader.Header.Get("Content-Type")
+	if contentType != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" {
+		return fiber.NewError(fiber.StatusBadRequest, "file must be an Excel (.xlsx) file")
+	}
+
+	file, err := fileHeader.Open()
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "failed to read uploaded file")
+	}
+	defer file.Close()
+
+	result, err := ctrl.UseCase.ImportFromExcel(c.Params("period_public_id"), file)
+	if err != nil {
+		return err
+	}
+	return response.Success(c, "Participants imported successfully.", result)
+}

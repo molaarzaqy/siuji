@@ -2,6 +2,7 @@ package http
 
 import (
 	"strconv"
+	"time"
 
 	"siuji-backend/internal/model"
 	"siuji-backend/internal/usecase"
@@ -18,12 +19,57 @@ func NewPeriodController(useCase *usecase.PeriodUseCase) *PeriodController {
 	return &PeriodController{UseCase: useCase}
 }
 
+var certificateTemplateTypes = []string{"image/jpeg", "image/png"}
+
 func (ctrl *PeriodController) Create(c fiber.Ctx) error {
-	request := new(model.PeriodRequest)
-	if err := c.Bind().Body(request); err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
+	year, _ := strconv.Atoi(c.FormValue("year"))
+	minPassingGrade, _ := strconv.Atoi(c.FormValue("min_passing_grade"))
+	maxPassingGrade, _ := strconv.Atoi(c.FormValue("max_passing_grade"))
+
+	startTime, err := time.Parse(time.RFC3339, c.FormValue("start_time"))
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "invalid start_time format, use RFC3339 (e.g. 2026-09-01T09:00:00Z)")
 	}
-	result, err := ctrl.UseCase.Create(request)
+	endTime, err := time.Parse(time.RFC3339, c.FormValue("end_time"))
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "invalid end_time format, use RFC3339")
+	}
+
+	var certificateExpMonth time.Time
+	if raw := c.FormValue("certificate_exp_month"); raw != "" {
+		certificateExpMonth, err = time.Parse(time.RFC3339, raw)
+		if err != nil {
+			return fiber.NewError(fiber.StatusBadRequest, "invalid certificate_exp_month format, use RFC3339")
+		}
+	}
+	request := &model.PeriodRequest{
+		Title:               c.FormValue("title"),
+		Month:               c.FormValue("month"),
+		Year:                year,
+		Status:              c.FormValue("status"),
+		CertificateExpMonth: certificateExpMonth,
+		MinPassingGrade:     minPassingGrade,
+		MaxPassingGrade:     maxPassingGrade,
+		StartTime:           startTime,
+		EndTime:             endTime,
+	}
+	fileHeader, err := c.FormFile("certificate_template")
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "certificate_template file is required")
+	}
+
+	file, err := fileHeader.Open()
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "failed to read uploaded file")
+	}
+	defer file.Close()
+
+	validatedFile, err := detectAndValidateContentType(file, certificateTemplateTypes, "certificate_template")
+	if err != nil {
+		return err
+	}
+
+	result, err := ctrl.UseCase.Create(c, request, validatedFile)
 	if err != nil {
 		return err
 	}
@@ -62,11 +108,46 @@ func (ctrl *PeriodController) GetDetail(c fiber.Ctx) error {
 }
 
 func (ctrl *PeriodController) Update(c fiber.Ctx) error {
-	request := new(model.PeriodRequest)
-	if err := c.Bind().Body(request); err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
+	year, _ := strconv.Atoi(c.FormValue("year"))
+	minPassingGrade, _ := strconv.Atoi(c.FormValue("min_passing_grade"))
+	maxPassingGrade, _ := strconv.Atoi(c.FormValue("max_passing_grade"))
+
+	startTime, err := time.Parse(time.RFC3339, c.FormValue("start_time"))
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "invalid start_time format, use RFC3339")
 	}
-	result, err := ctrl.UseCase.Update(c.Params("period_public_id"), request)
+	endTime, err := time.Parse(time.RFC3339, c.FormValue("end_time"))
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "invalid end_time format, use RFC3339")
+	}
+
+	var certificateExpMonth time.Time
+	if raw := c.FormValue("certificate_exp_month"); raw != "" {
+		certificateExpMonth, err = time.Parse(time.RFC3339, raw)
+		if err != nil {
+			return fiber.NewError(fiber.StatusBadRequest, "invalid certificate_exp_month format, use RFC3339")
+		}
+	}
+
+	request := &model.PeriodRequest{
+		Title:               c.FormValue("title"),
+		Month:               c.FormValue("month"),
+		Year:                year,
+		Status:              c.FormValue("status"),
+		CertificateExpMonth: certificateExpMonth,
+		MinPassingGrade:     minPassingGrade,
+		MaxPassingGrade:     maxPassingGrade,
+		StartTime:           startTime,
+		EndTime:             endTime,
+	}
+
+	certificateTemplate, closeTemplate, err := extractOptionalFile(c, "certificate_template", certificateTemplateTypes)
+	if err != nil {
+		return err
+	}
+	defer closeTemplate()
+
+	result, err := ctrl.UseCase.Update(c, c.Params("period_public_id"), request, certificateTemplate)
 	if err != nil {
 		return err
 	}

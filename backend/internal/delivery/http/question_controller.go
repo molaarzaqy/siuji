@@ -18,12 +18,30 @@ func NewQuestionController(useCase *usecase.QuestionUseCase) *QuestionController
 	}
 }
 
+var audioTypes = []string{"audio/mpeg", "audio/mp3", "audio/wav", "audio/x-wav"}
+var imageTypes = []string{"image/jpeg", "image/png"}
+
 func (ctrl *QuestionController) Create(c fiber.Ctx) error {
-	request := new(model.QuestionRequest)
-	if err := c.Bind().Body(request); err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
+	request := &model.QuestionRequest{
+		Question: c.FormValue("question"),
 	}
-	result, err := ctrl.UseCase.Create(c.Params("section_public_id"), request)
+	if passage := c.FormValue("passage"); passage != "" {
+		request.Passage = &passage
+	}
+
+	audioFile, closeAudio, err := extractOptionalFile(c, "audio", audioTypes)
+	if err != nil {
+		return err
+	}
+	defer closeAudio()
+
+	imageFile, closeImage, err := extractOptionalFile(c, "image", imageTypes)
+	if err != nil {
+		return err
+	}
+	defer closeImage()
+
+	result, err := ctrl.UseCase.Create(c, c.Params("section_public_id"), request, audioFile, imageFile)
 	if err != nil {
 		return err
 	}
@@ -39,11 +57,26 @@ func (ctrl *QuestionController) GetDetail(c fiber.Ctx) error {
 }
 
 func (ctrl *QuestionController) Update(c fiber.Ctx) error {
-	request := new(model.QuestionRequest)
-	if err := c.Bind().Body(request); err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
+	request := &model.QuestionRequest{
+		Question: c.FormValue("question"),
 	}
-	result, err := ctrl.UseCase.Update(c.Params("question_public_id"), request)
+	if passage := c.FormValue("passage"); passage != "" {
+		request.Passage = &passage
+	}
+
+	audioFile, closeAudio, err := extractOptionalFile(c, "audio", audioTypes)
+	if err != nil {
+		return err
+	}
+	defer closeAudio()
+
+	imageFile, closeImage, err := extractOptionalFile(c, "image", imageTypes)
+	if err != nil {
+		return err
+	}
+	defer closeImage()
+
+	result, err := ctrl.UseCase.Update(c, c.Params("question_public_id"), request, audioFile, imageFile)
 	if err != nil {
 		return err
 	}

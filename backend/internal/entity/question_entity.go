@@ -14,7 +14,7 @@ type Question struct {
 	AudioURL  *string   `gorm:"column:audio_url"`
 	ImageURL  *string   `gorm:"column:image_url"`
 	Passage   *string   `gorm:"column:passage"`
-	Position  int       `gorm:"column:position"`
+	Number    int       `gorm:"column:number"`
 	CreatedAt time.Time `gorm:"column:created_at"`
 	UpdatedAt time.Time `gorm:"column:updated_at"`
 

@@ -50,12 +50,13 @@ func (c *OptionUseCase) Create(questionPublicID string, request *model.OptionReq
 		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to create option")
 	}
 
+	position := maxPosition + 1
 	option := &entity.Option{
 		PublicID:   uuid.New(),
 		QuestionID: question.ID,
-		Label:      request.Label,
+		Label:      entity.LabelFromPosition(position),
 		OptionText: request.OptionText,
-		Position:   maxPosition + 1,
+		Position:   position,
 	}
 
 	if err := c.OptionRepository.Create(option); err != nil {
@@ -77,8 +78,8 @@ func (c *OptionUseCase) Update(publicID string, request *model.OptionRequest) (*
 		return nil, fiber.NewError(fiber.StatusNotFound, "option not found")
 	}
 
-	option.Label = request.Label
 	option.OptionText = request.OptionText
+	// Label TIDAK diubah di sini — dia cuma berubah lewat Create (posisi baru) atau Reorder.
 
 	if err := c.OptionRepository.Update(option); err != nil {
 		c.Log.Errorf("failed to update option: %+v", err)

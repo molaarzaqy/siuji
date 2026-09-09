@@ -1,7 +1,6 @@
 package model
 
 type OptionRequest struct {
-	Label      string `json:"label" validate:"required"`
 	OptionText string `json:"option_text" validate:"required"`
 }
 

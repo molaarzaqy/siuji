@@ -7,7 +7,6 @@ type PeriodRequest struct {
 	Month               string    `json:"month" validate:"required"`
 	Year                int       `json:"year" validate:"required"`
 	Status              string    `json:"status" validate:"required,oneof=draft published closed"`
-	CertificateURL      string    `json:"certificate_url"`
 	CertificateExpMonth time.Time `json:"certificate_exp_month"`
 	MinPassingGrade     int       `json:"min_passing_grade"`
 	MaxPassingGrade     int       `json:"max_passing_grade"`

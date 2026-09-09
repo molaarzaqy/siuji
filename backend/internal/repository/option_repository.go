@@ -5,6 +5,7 @@ import (
 
 	"siuji-backend/internal/entity"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -30,8 +31,13 @@ func (r *optionRepository) Create(option *entity.Option) error {
 }
 
 func (r *optionRepository) FindByPublicID(publicID string) (*entity.Option, error) {
+	parsedID, err := uuid.Parse(publicID)
+	if err != nil {
+		return nil, errors.New("invalid uuid format")
+	}
+
 	var option entity.Option
-	err := r.db.Where("public_id = ?", publicID).First(&option).Error
+	err = r.db.Where("public_id = ?", parsedID).First(&option).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("option not found")
@@ -55,7 +61,12 @@ func (r *optionRepository) Update(option *entity.Option) error {
 }
 
 func (r *optionRepository) Delete(publicID string) error {
-	result := r.db.Where("public_id = ?", publicID).Delete(&entity.Option{})
+	parsedID, err := uuid.Parse(publicID)
+	if err != nil {
+		return errors.New("invalid uuid format")
+	}
+
+	result := r.db.Where("public_id = ?", parsedID).Delete(&entity.Option{})
 	if result.Error != nil {
 		return result.Error
 	}
@@ -66,11 +77,24 @@ func (r *optionRepository) Delete(publicID string) error {
 }
 
 func (r *optionRepository) UpdatePositionsByPublicIDs(publicIDs []string) error {
+	parsedIDs := make([]uuid.UUID, len(publicIDs))
+	for i, idStr := range publicIDs {
+		parsedID, err := uuid.Parse(idStr)
+		if err != nil {
+			return errors.New("invalid uuid format")
+		}
+		parsedIDs[i] = parsedID
+	}
+
 	return r.db.Transaction(func(tx *gorm.DB) error {
-		for index, publicID := range publicIDs {
+	for index, parsedID := range parsedIDs {
+			position := index + 1
 			result := tx.Model(&entity.Option{}).
-				Where("public_id = ?", publicID).
-				Update("position", index+1)
+				Where("public_id = ?", parsedID).
+				Updates(map[string]interface{}{
+					"position": position,
+					"label":    entity.LabelFromPosition(position),
+				})
 			if result.Error != nil {
 				return result.Error
 			}

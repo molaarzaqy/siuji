@@ -1,10 +1,13 @@
 package usecase
 
 import (
+	"context"
+	"io"
 	"siuji-backend/internal/entity"
 	"siuji-backend/internal/model"
 	"siuji-backend/internal/model/converter"
 	"siuji-backend/internal/repository"
+	"siuji-backend/pkg/cloudinary"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v3"
@@ -18,6 +21,7 @@ type PeriodUseCase struct {
 	PeriodRepository        repository.PeriodRepository
 	SectionRepository       repository.SectionRepository
 	PeriodSectionRepository repository.PeriodSectionRepository
+	CloudinaryService 		*cloudinary.Service
 }
 
 func NewPeriodUseCase(
@@ -26,6 +30,7 @@ func NewPeriodUseCase(
 	periodRepository repository.PeriodRepository,
 	sectionRepository repository.SectionRepository,
 	periodSectionRepository repository.PeriodSectionRepository,
+	cloudinaryService *cloudinary.Service,
 ) *PeriodUseCase {
 	return &PeriodUseCase{
 		Log:                     log,
@@ -33,34 +38,37 @@ func NewPeriodUseCase(
 		PeriodRepository:        periodRepository,
 		SectionRepository:       sectionRepository,
 		PeriodSectionRepository: periodSectionRepository,
+		CloudinaryService: cloudinaryService,
 	}
 }
 
-func (c *PeriodUseCase) Create(request *model.PeriodRequest) (*model.PeriodResponse, error) {
+func (c *PeriodUseCase) Create(ctx context.Context, request *model.PeriodRequest, certificateTamplate io.Reader) (*model.PeriodResponse, error) {
 	if err := c.Validate.Struct(request); err != nil {
 		c.Log.Warnf("invalid create period request: %+v", err)
 		return nil, fiber.NewError(fiber.StatusBadRequest, "invalid request")
 	}
-
+	certificateURL, err := c.CloudinaryService.UploadCertificateTemplate(ctx, certificateTamplate)
+	if err != nil {
+		c.Log.Errorf("failed to upload certificate tamplate: %+v", err)
+		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to upload certificate tamplate")
+	}
 	period := &entity.Period{
 		PublicID:            uuid.New(),
 		Title:               request.Title,
 		Month:               request.Month,
 		Year:                request.Year,
 		Status:              request.Status,
-		CertificateURL:      request.CertificateURL,
+		CertificateURL:      certificateURL,
 		CertificateExpMonth: request.CertificateExpMonth,
 		MinPassingGrade:     request.MinPassingGrade,
 		MaxPassingGrade:     request.MaxPassingGrade,
 		StartTime:           request.StartTime,
 		EndTime:             request.EndTime,
 	}
-
 	if err := c.PeriodRepository.Create(period); err != nil {
 		c.Log.Errorf("failed to create period: %+v", err)
 		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to create period")
 	}
-
 	return converter.PeriodToResponse(period), nil
 }
 
@@ -86,7 +94,7 @@ func (c *PeriodUseCase) GetDetail(publicID string) (*model.PeriodDetailResponse,
 	return converter.PeriodToDetailResponse(period), nil
 }
 
-func (c *PeriodUseCase) Update(publicID string, request *model.PeriodRequest) (*model.PeriodResponse, error) {
+func (c *PeriodUseCase) Update(ctx context.Context, publicID string, request *model.PeriodRequest, certificateTamplate io.Reader) (*model.PeriodResponse, error) {
 	if err := c.Validate.Struct(request); err != nil {
 		c.Log.Warnf("invalid update period request: %+v", err)
 		return nil, fiber.NewError(fiber.StatusBadRequest, "invalid request")
@@ -101,12 +109,20 @@ func (c *PeriodUseCase) Update(publicID string, request *model.PeriodRequest) (*
 	period.Month = request.Month
 	period.Year = request.Year
 	period.Status = request.Status
-	period.CertificateURL = request.CertificateURL
 	period.CertificateExpMonth = request.CertificateExpMonth
 	period.MinPassingGrade = request.MinPassingGrade
-	period.MaxPassingGrade = request.MaxPassingGrade
+	period.MaxPassingGrade = request.MaxPassingGrade 
 	period.StartTime = request.StartTime
 	period.EndTime = request.EndTime
+
+	if certificateTamplate != nil {
+		certificateURL, err := c.CloudinaryService.UploadCertificateTemplate(ctx, certificateTamplate)
+		if err != nil {
+			c.Log.Errorf("failed to upload certificate tamplate: %+v", err)
+			return nil,fiber.NewError(fiber.StatusInternalServerError, "failed to upload certifica tamplate")
+		}
+		period.CertificateURL = certificateURL
+	}
 
 	if err := c.PeriodRepository.Update(period); err != nil {
 		c.Log.Errorf("failed to update period: %+v", err)

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"siuji-backend/internal/entity"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -31,8 +32,13 @@ func (r *periodRepository) Create(period *entity.Period) error {
 }
 
 func (r *periodRepository) FindByPublicID(publicID string) (*entity.Period, error) {
+	parsedID, err := uuid.Parse(publicID)
+	if err != nil {
+		return nil, errors.New("invalid uuid format")
+	}
+
 	var period entity.Period
-	err := r.db.Where("public_id = ?", publicID).First(&period).Error
+	err = r.db.Where("public_id = ?", parsedID).First(&period).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("period not found")
@@ -43,13 +49,18 @@ func (r *periodRepository) FindByPublicID(publicID string) (*entity.Period, erro
 }
 
 func (r *periodRepository) FindByPublicIDWithSections(publicID string) (*entity.Period, error) {
+	parsedID, err := uuid.Parse(publicID)
+	if err != nil {
+		return nil, errors.New("invalid uuid format")
+	}
+
 	var period entity.Period
-	err := r.db.
+	err = r.db.
 		Preload("PeriodSections", func(db *gorm.DB) *gorm.DB {
 			return db.Order("period_sections.position ASC")
 		}).
 		Preload("PeriodSections.Section").
-		Where("public_id = ?", publicID).
+		Where("public_id = ?", parsedID).
 		First(&period).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -111,7 +122,12 @@ func (r *periodRepository) Update(period *entity.Period) error {
 }
 
 func (r *periodRepository) Delete(publicID string) error {
-		result := r.db.Where("public_id = ?", publicID).Delete(&entity.Period{})
+	parsedID, err := uuid.Parse(publicID)
+	if err != nil {
+		return errors.New("invalid uuid format")
+	}
+
+	result := r.db.Where("public_id = ?", parsedID).Delete(&entity.Period{})
 	if result.Error != nil {
 		return result.Error
 	}

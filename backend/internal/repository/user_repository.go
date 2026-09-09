@@ -4,6 +4,7 @@ import (
 	"errors"
 	"siuji-backend/internal/entity"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -43,8 +44,13 @@ func (r *userRepository) FindByID(id uint) (*entity.User, error) {
 }
 
 func (r *userRepository) FindByPublicID(publicID string) (*entity.User, error) {
+	parsedID, err := uuid.Parse(publicID)
+	if err != nil {
+		return nil, errors.New("invalid uuid format")
+	}
+	
 	var user entity.User
-	err := r.db.Where("public_id = ?", publicID).First(&user).Error
+	err = r.db.Where("public_id = ?", parsedID).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("user not found")
@@ -128,7 +134,12 @@ func (r *userRepository) FindAllPagination(filter, sort string, limit, offset in
 }
 
 func (r *userRepository) Delete(publicID string) error {
-	result := r.db.Where("public_id = ?", publicID).Delete(&entity.User{})
+	parsedID, err := uuid.Parse(publicID)
+	if err != nil {
+		return errors.New("invalid uuid format")
+	}
+
+	result := r.db.Where("public_id = ?", parsedID).Delete(&entity.User{})
 	if result.Error != nil {
 		return result.Error
 	}
