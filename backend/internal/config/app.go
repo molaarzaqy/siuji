@@ -5,6 +5,7 @@ import (
 	"siuji-backend/internal/delivery/http/route"
 	"siuji-backend/internal/repository"
 	"siuji-backend/internal/usecase"
+	"siuji-backend/pkg/certificate"
 	"siuji-backend/pkg/cloudinary"
 	"siuji-backend/pkg/email"
 	"siuji-backend/pkg/jwt"
@@ -37,9 +38,13 @@ func Bootstrap(config *BootstrapConfig) {
 	questionRepository := repository.NewQuestionRepository(config.DB)
 	optionRepository := repository.NewOptionRepository(config.DB)
 	answerKeyRepository := repository.NewAnswerKeyRepository(config.DB)
+	participantAnswerRepository := repository.NewParticipantAnswerRepository(config.DB)
+	sectionScoreRepository := repository.NewSectionScoreRepository(config.DB)
+	scoreConversionRepository := repository.NewScoreConversionRepository(config.DB)
 
 	// setup external services
 	emailService := email.NewService()
+	certificateGenerator := certificate.NewGenerator()
 
 	// setup usecases
 	authUseCase := usecase.NewAuthUseCase(config.Log, config.Validate, userRepository, otpRepository, emailService, config.JWTManager)
@@ -47,9 +52,26 @@ func Bootstrap(config *BootstrapConfig) {
 	sectionUseCase := usecase.NewSectionUseCase(config.Log, config.Validate, sectionRepository)
 	userUseCase := usecase.NewUserUseCase(config.Log, userRepository)
 	participantUseCase := usecase.NewParticipantUseCase(config.Log, config.Validate, participantPeriodRepository, userRepository, periodRepository)
+	participantExamUseCase := usecase.NewParticipantExamUseCase(
+		config.Log,
+		config.Validate,
+		participantPeriodRepository,
+		periodRepository,
+		periodSectionRepository,
+		sectionRepository,
+		questionRepository,
+		optionRepository,
+		answerKeyRepository,
+		participantAnswerRepository,
+		sectionScoreRepository,
+		scoreConversionRepository,
+		config.CloudinaryService,
+		certificateGenerator,
+	)
 	questionUseCase := usecase.NewQuestionUseCase(config.Log, config.Validate, questionRepository, sectionRepository, config.CloudinaryService)
 	optionUseCase := usecase.NewOptionUseCase(config.Log, config.Validate, optionRepository, questionRepository)
 	answerKeyUseCase := usecase.NewAnswerKeyUseCase(config.Log, config.Validate, answerKeyRepository, questionRepository, optionRepository)
+	scoreConversionUseCase := usecase.NewScoreConversionUseCase(config.Log, config.Validate, scoreConversionRepository)
 
 	// setup controllers
 	authController := http.NewAuthController(authUseCase)
@@ -57,23 +79,27 @@ func Bootstrap(config *BootstrapConfig) {
 	sectionController := http.NewSectionController(sectionUseCase)
 	userController := http.NewUserController(userUseCase)
 	participantController := http.NewParticipantController(participantUseCase)
+	participantExamController := http.NewParticipantExamController(participantExamUseCase)
 	questionController := http.NewQuestionController(questionUseCase)
 	optionController := http.NewOptionController(optionUseCase)
 	answerKeyController := http.NewAnswerKeyController(answerKeyUseCase)
+	scoreConversionController := http.NewScoreConversionController(scoreConversionUseCase)
 
 	// setup routes
 	routeConfig := route.RouteConfig{
-		App:            config.App,
-		AuthController: authController,
-		PeriodController:       periodController,
-		SectionController:      sectionController,
-		QuestionController:     questionController,
-		OptionController:       optionController,
-		AnswerKeyController:    answerKeyController,
-		UserController:         userController,
-		ParticipantController:  participantController,
-		JWTManager:     config.JWTManager,
-		Log:            config.Log,
+		App:                       config.App,
+		AuthController:            authController,
+		PeriodController:          periodController,
+		SectionController:         sectionController,
+		QuestionController:        questionController,
+		OptionController:          optionController,
+		AnswerKeyController:       answerKeyController,
+		UserController:            userController,
+		ParticipantController:     participantController,
+		ParticipantExamController: participantExamController,
+		ScoreConversionController: scoreConversionController,
+		JWTManager:                config.JWTManager,
+		Log:                       config.Log,
 	}
 	routeConfig.Setup()
 }

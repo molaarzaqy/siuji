@@ -18,8 +18,10 @@ type RouteConfig struct {
 	QuestionController 	  *http.QuestionController
 	OptionController 	  *http.OptionController
 	AnswerKeyController	  *http.AnswerKeyController
-	ParticipantController *http.ParticipantController
-	UserController        *http.UserController
+	ParticipantController     *http.ParticipantController
+	ParticipantExamController *http.ParticipantExamController
+	ScoreConversionController *http.ScoreConversionController
+	UserController            *http.UserController
 	JWTManager     *jwt.Manager
 	Log            *logrus.Logger
 }
@@ -32,6 +34,8 @@ func (r *RouteConfig) Setup() {
 	r.setupQuestionRoutes()
 	r.setupOptionRoutes()
 	r.setupUserRoutes()
+	r.setupParticipantRoutes()
+	r.setupScoreConversionRoutes()
 }
 
 func (r *RouteConfig) setupSwaggerRoutes() {
@@ -124,4 +128,31 @@ func (r *RouteConfig) setupUserRoutes() {
 	users.Get("/", r.UserController.GetAll)
 	users.Get("/:user_public_id", r.UserController.GetDetail)
 	users.Delete("/:user_public_id", r.UserController.Delete)
+}
+
+func (r *RouteConfig) setupScoreConversionRoutes() {
+	scoreConversions := r.App.Group("/api/v1/score-conversions",
+		middleware.JWTAuth(r.JWTManager, r.Log),
+		middleware.RequireRole("admin"),
+	)
+
+	scoreConversions.Post("/", r.ScoreConversionController.Create)
+	scoreConversions.Get("/", r.ScoreConversionController.GetAll)
+	scoreConversions.Post("/bulk", r.ScoreConversionController.BulkCreate)
+	scoreConversions.Put("/:id", r.ScoreConversionController.Update)
+	scoreConversions.Delete("/:id", r.ScoreConversionController.Delete)
+}
+
+func (r *RouteConfig) setupParticipantRoutes() {
+	participant := r.App.Group("/api/v1/participant",
+		middleware.JWTAuth(r.JWTManager, r.Log),
+		middleware.RequireRole("participant"),
+	)
+
+	participant.Get("/periods", r.ParticipantExamController.GetPeriods)
+	participant.Get("/periods/:period_public_id", r.ParticipantExamController.GetPeriodDetail)
+	participant.Post("/periods/:period_public_id/start", r.ParticipantExamController.StartExam)
+	participant.Post("/periods/:period_public_id/answers", r.ParticipantExamController.SaveAnswer)
+	participant.Post("/periods/:period_public_id/submit", r.ParticipantExamController.SubmitExam)
+	participant.Get("/periods/:period_public_id/result", r.ParticipantExamController.GetResult)
 }

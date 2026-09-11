@@ -39,7 +39,7 @@ func (s *Service) upload(ctx context.Context, file io.Reader, folder, resorceTyp
 }
 
 func (s *Service) UploadCertificateTemplate(ctx context.Context, file io.Reader) (string, error) {
-	return s.upload(ctx, file, FolderCertificateTemplates, "image")
+	return s.upload(ctx, file, FolderCertificateTemplates, "auto")
 }
 
 func (s *Service) UploadGeneratedCertificate(ctx context.Context, file io.Reader) (string, error) {

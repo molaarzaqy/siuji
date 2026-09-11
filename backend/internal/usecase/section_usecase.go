@@ -39,6 +39,7 @@ func (c *SectionUseCase) Create(request *model.SectionRequest) (*model.SectionRe
 	section := &entity.Section{
 		PublicID: uuid.New(),
 		Title:    request.Title,
+		SectionType: request.SectionType,
 	}
 
 	if err := c.SectionRepository.Create(section); err != nil {
@@ -83,6 +84,7 @@ func (c *SectionUseCase) Update(publicID string, request *model.SectionRequest) 
 	}
 
 	section.Title = request.Title
+	section.SectionType = request.SectionType
 
 	if err := c.SectionRepository.Update(section); err != nil {
 		c.Log.Errorf("failed to update section: %+v", err)

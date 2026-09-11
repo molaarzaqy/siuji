@@ -17,6 +17,9 @@ type ParticipantPeriodRepository interface {
 	Update(pp *entity.ParticipantPeriod) error
 	DeleteByPeriodAndUserPublicID(periodID uint, userPublicID string) error
 	BulkCreate(list []entity.ParticipantPeriod) error
+	FindByUserID(userID uint) ([]entity.ParticipantPeriod, error)
+	FindByPeriodIDAndUserID(periodID, userID uint) (*entity.ParticipantPeriod, error)
+	FindByPeriodPublicIDAndUserID(periodPublicID string, userID uint) (*entity.ParticipantPeriod, error)
 }
 
 type participantPeriodRepository struct {
@@ -133,4 +136,52 @@ func (r *participantPeriodRepository) BulkCreate(list []entity.ParticipantPeriod
 		return nil
 	}
 	return r.db.Create(&list).Error
+}
+
+func (r *participantPeriodRepository) FindByUserID(userID uint) ([]entity.ParticipantPeriod, error) {
+	var list []entity.ParticipantPeriod
+	err := r.db.
+		Preload("Period").
+		Where("user_id = ?", userID).
+		Order("created_at DESC").
+		Find(&list).Error
+	return list, err
+}
+
+func (r *participantPeriodRepository) FindByPeriodIDAndUserID(periodID, userID uint) (*entity.ParticipantPeriod, error) {
+	var pp entity.ParticipantPeriod
+	err := r.db.
+		Preload("Period").
+		Preload("User").
+		Where("period_id = ? AND user_id = ?", periodID, userID).
+		First(&pp).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("participant not registered in this period")
+		}
+		return nil, err
+	}
+	return &pp, nil
+}
+
+func (r *participantPeriodRepository) FindByPeriodPublicIDAndUserID(periodPublicID string, userID uint) (*entity.ParticipantPeriod, error) {
+	parsedPeriodID, err := uuid.Parse(periodPublicID)
+	if err != nil {
+		return nil, errors.New("invalid uuid format")
+	}
+
+	var pp entity.ParticipantPeriod
+	err = r.db.
+		Preload("Period").
+		Preload("User").
+		Joins("JOIN periods ON periods.id = participant_periods.period_id").
+		Where("periods.public_id = ? AND participant_periods.user_id = ?", parsedPeriodID, userID).
+		First(&pp).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("participant not registered in this period")
+		}
+		return nil, err
+	}
+	return &pp, nil
 }

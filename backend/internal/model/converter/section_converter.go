@@ -9,6 +9,7 @@ func SectionToResponse(section *entity.Section) *model.SectionResponse {
 	return &model.SectionResponse{
 		PublicID:  section.PublicID.String(),
 		Title:     section.Title,
+		SectionType: section.SectionType,
 		CreatedAt: section.CreatedAt,
 		UpdatedAt: section.UpdatedAt,
 	}

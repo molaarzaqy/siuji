@@ -50,7 +50,7 @@ func (r *userRepository) FindByPublicID(publicID string) (*entity.User, error) {
 	}
 	
 	var user entity.User
-	err = r.db.Where("public_id = ?", parsedID).First(&user).Error
+	err = r.db.Where("public_id = ? AND role = ?", parsedID, "participant").First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("user not found")
@@ -91,7 +91,7 @@ func (r *userRepository) FindAllPagination(filter, sort string, limit, offset in
 	var users []entity.User
 	var total int64
 
-	db := r.db.Model(&entity.User{})
+	db := r.db.Model(&entity.User{}).Where("role = ?", "participant")
 	if filter != "" {
 		filterPattern := "%" + filter + "%"
 		db = db.Where("name ILIKE ? OR email ILIKE ? OR nim ILIKE ? OR university ILIKE ?",
@@ -139,7 +139,7 @@ func (r *userRepository) Delete(publicID string) error {
 		return errors.New("invalid uuid format")
 	}
 
-	result := r.db.Where("public_id = ?", parsedID).Delete(&entity.User{})
+	result := r.db.Where("public_id = ? AND role = ?", parsedID, "participant").Delete(&entity.User{})
 	if result.Error != nil {
 		return result.Error
 	}

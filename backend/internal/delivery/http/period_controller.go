@@ -19,7 +19,7 @@ func NewPeriodController(useCase *usecase.PeriodUseCase) *PeriodController {
 	return &PeriodController{UseCase: useCase}
 }
 
-var certificateTemplateTypes = []string{"image/jpeg", "image/png"}
+var certificateTemplateTypes = []string{"image/jpeg", "image/png", "application/pdf"}
 
 func (ctrl *PeriodController) Create(c fiber.Ctx) error {
 	year, _ := strconv.Atoi(c.FormValue("year"))
