@@ -350,9 +350,2582 @@
                     }
                 }
             }
+        },
+        "/options/{option_public_id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Option"
+                ],
+                "summary": "Update option",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Option public ID",
+                        "name": "option_public_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Option data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.OptionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.OptionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Option"
+                ],
+                "summary": "Delete option",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Option public ID",
+                        "name": "option_public_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/participant/periods": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get periods the logged-in participant is registered for.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ParticipantExam"
+                ],
+                "summary": "List my exam periods",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/model.ParticipantPeriodListResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/participant/periods/{period_public_id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ParticipantExam"
+                ],
+                "summary": "Get my exam period detail",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Period public ID",
+                        "name": "period_public_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.ParticipantPeriodDetailResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/participant/periods/{period_public_id}/answers": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Can be called repeatedly while the exam is in progress — upserts by question.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ParticipantExam"
+                ],
+                "summary": "Save/update an answer",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Period public ID",
+                        "name": "period_public_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Answer",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.SaveAnswerRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.SaveAnswerResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/participant/periods/{period_public_id}/result": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns the final score, section breakdown, and certificate URL (generated on first request if passed).",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ParticipantExam"
+                ],
+                "summary": "Get exam result",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Period public ID",
+                        "name": "period_public_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.ExamResultResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/participant/periods/{period_public_id}/start": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Marks the exam as started and returns all sections/questions (without correct answers).",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ParticipantExam"
+                ],
+                "summary": "Start exam",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Period public ID",
+                        "name": "period_public_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.ExamSessionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/participant/periods/{period_public_id}/submit": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Finalizes the exam, computes section scores and the final TOEFL score.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ParticipantExam"
+                ],
+                "summary": "Submit exam",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Period public ID",
+                        "name": "period_public_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.SubmitExamResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/periods": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get a paginated list of exam periods.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Period"
+                ],
+                "summary": "List periods",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Items per page",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by title",
+                        "name": "filter",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort field, e.g. -created_at",
+                        "name": "sort",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.ResponsePaginated"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/model.PeriodResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new exam period with a certificate template image.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Period"
+                ],
+                "summary": "Create period",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Period title",
+                        "name": "title",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Month",
+                        "name": "month",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Year",
+                        "name": "year",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "draft, published, or closed",
+                        "name": "status",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "RFC3339 datetime",
+                        "name": "certificate_exp_month",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Minimum passing grade",
+                        "name": "min_passing_grade",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Maximum passing grade",
+                        "name": "max_passing_grade",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "RFC3339 datetime",
+                        "name": "start_time",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "RFC3339 datetime",
+                        "name": "end_time",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Certificate template image (JPEG/PNG)",
+                        "name": "certificate_template",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.PeriodResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/periods/{period_public_id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get a period with its assigned sections.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Period"
+                ],
+                "summary": "Get period detail",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Period public ID",
+                        "name": "period_public_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.PeriodDetailResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update a period. certificate_template is optional — omit to keep the existing one.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Period"
+                ],
+                "summary": "Update period",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Period public ID",
+                        "name": "period_public_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Period title",
+                        "name": "title",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Month",
+                        "name": "month",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Year",
+                        "name": "year",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "draft, published, or closed",
+                        "name": "status",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "RFC3339 datetime",
+                        "name": "certificate_exp_month",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Minimum passing grade",
+                        "name": "min_passing_grade",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Maximum passing grade",
+                        "name": "max_passing_grade",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "RFC3339 datetime",
+                        "name": "start_time",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "RFC3339 datetime",
+                        "name": "end_time",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "New certificate template (optional)",
+                        "name": "certificate_template",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.PeriodResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Period"
+                ],
+                "summary": "Delete period",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Period public ID",
+                        "name": "period_public_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/periods/{period_public_id}/participants": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Participant"
+                ],
+                "summary": "List participants in a period",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Period public ID",
+                        "name": "period_public_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Items per page",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by name/email/nim",
+                        "name": "filter",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort field",
+                        "name": "sort",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.ResponsePaginated"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/model.ParticipantResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates the user account if the email doesn't exist yet. Password is auto-generated from NIM.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Participant"
+                ],
+                "summary": "Add participant to period",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Period public ID",
+                        "name": "period_public_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Participant data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.AddParticipantRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.ParticipantResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/periods/{period_public_id}/participants/import": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Columns (in order, header row skipped): Name, Email, NIM, University.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Participant"
+                ],
+                "summary": "Import participants from Excel",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Period public ID",
+                        "name": "period_public_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Excel file (.xlsx)",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.ImportParticipantResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/periods/{period_public_id}/participants/{user_public_id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Participant"
+                ],
+                "summary": "Get participant detail",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Period public ID",
+                        "name": "period_public_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "User public ID",
+                        "name": "user_public_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.ParticipantResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Partial update — only non-empty fields are applied. Changing NIM regenerates the password.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Participant"
+                ],
+                "summary": "Update participant",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Period public ID",
+                        "name": "period_public_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "User public ID",
+                        "name": "user_public_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Fields to update",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.UpdateParticipantRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.ParticipantResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Participant"
+                ],
+                "summary": "Remove participant from period",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Period public ID",
+                        "name": "period_public_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "User public ID",
+                        "name": "user_public_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/periods/{period_public_id}/sections": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Period"
+                ],
+                "summary": "Assign section to period",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Period public ID",
+                        "name": "period_public_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Section to assign",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.AssignSectionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.PeriodSectionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/periods/{period_public_id}/sections/reorder": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Period"
+                ],
+                "summary": "Reorder sections within a period",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Period public ID",
+                        "name": "period_public_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Ordered list of section public IDs",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.ReorderSectionsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/periods/{period_public_id}/sections/{section_public_id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Period"
+                ],
+                "summary": "Remove section from period",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Period public ID",
+                        "name": "period_public_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Section public ID",
+                        "name": "section_public_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/questions/{question_public_id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get a question with its options and correct answer.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Question"
+                ],
+                "summary": "Get question detail",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Question public ID",
+                        "name": "question_public_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.QuestionDetailResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update question text/passage. audio/image are optional — omit to keep the existing files.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Question"
+                ],
+                "summary": "Update question",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Question public ID",
+                        "name": "question_public_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Question text",
+                        "name": "question",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Reading passage",
+                        "name": "passage",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "New audio file (optional)",
+                        "name": "audio",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "New image file (optional)",
+                        "name": "image",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.QuestionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Question"
+                ],
+                "summary": "Delete question",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Question public ID",
+                        "name": "question_public_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/questions/{question_public_id}/answer-key": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create or update the answer key. The option must belong to the given question.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AnswerKey"
+                ],
+                "summary": "Set correct answer for a question",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Question public ID",
+                        "name": "question_public_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Correct option",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.UpsertAnswerKeyRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.AnswerKeyResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/questions/{question_public_id}/options": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new answer option for a question. Label (A, B, C, ...) is auto-derived from position.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Option"
+                ],
+                "summary": "Create option",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Question public ID",
+                        "name": "question_public_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Option data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.OptionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.OptionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/questions/{question_public_id}/options/reorder": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Labels (A, B, C, ...) are automatically reassigned to match the new order.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Option"
+                ],
+                "summary": "Reorder options within a question",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Question public ID",
+                        "name": "question_public_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Ordered list of option public IDs",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.ReorderOptionsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/score-conversions": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ScoreConversion"
+                ],
+                "summary": "List score conversions",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by listening, structure, or reading",
+                        "name": "section_type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/model.ScoreConversionResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ScoreConversion"
+                ],
+                "summary": "Create score conversion entry",
+                "parameters": [
+                    {
+                        "description": "Conversion entry",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.ScoreConversionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.ScoreConversionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/score-conversions/bulk": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Insert or update multiple entries at once, keyed by (section_type, correct_count).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ScoreConversion"
+                ],
+                "summary": "Bulk upsert score conversions",
+                "parameters": [
+                    {
+                        "description": "List of conversion entries",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.BulkScoreConversionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.BulkScoreConversionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/score-conversions/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ScoreConversion"
+                ],
+                "summary": "Update score conversion entry",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Score conversion ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Conversion entry",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.ScoreConversionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.ScoreConversionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ScoreConversion"
+                ],
+                "summary": "Delete score conversion entry",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Score conversion ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/sections": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Section"
+                ],
+                "summary": "List sections",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/model.SectionResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new section (question bank). section_type must be listening, structure, or reading.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Section"
+                ],
+                "summary": "Create section",
+                "parameters": [
+                    {
+                        "description": "Section data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.SectionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.SectionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/sections/{section_public_id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get a section with its questions, options, and correct answers.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Section"
+                ],
+                "summary": "Get section detail",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Section public ID",
+                        "name": "section_public_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.SectionDetailResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Section"
+                ],
+                "summary": "Update section",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Section public ID",
+                        "name": "section_public_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Section data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.SectionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.SectionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Section"
+                ],
+                "summary": "Delete section",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Section public ID",
+                        "name": "section_public_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/sections/{section_public_id}/questions": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new question in a section. audio and image files are optional depending on section type.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Question"
+                ],
+                "summary": "Create question",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Section public ID",
+                        "name": "section_public_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Question text",
+                        "name": "question",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Reading passage (for Reading section)",
+                        "name": "passage",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Audio file (for Listening section)",
+                        "name": "audio",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Image file (optional)",
+                        "name": "image",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.QuestionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/sections/{section_public_id}/questions/reorder": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Question"
+                ],
+                "summary": "Reorder questions within a section",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Section public ID",
+                        "name": "section_public_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Ordered list of question public IDs",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.ReorderQuestionsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/users": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "List users",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Items per page",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by name/email/nim/university",
+                        "name": "filter",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort field",
+                        "name": "sort",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.ResponsePaginated"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/model.UserResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{user_public_id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get user detail",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User public ID",
+                        "name": "user_public_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.UserResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Delete user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User public ID",
+                        "name": "user_public_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseNoData"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "model.AddParticipantRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "name",
+                "nim"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "nim": {
+                    "type": "string"
+                },
+                "university": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.AnswerKeyResponse": {
+            "type": "object",
+            "properties": {
+                "correct_option_public_id": {
+                    "type": "string"
+                },
+                "public_id": {
+                    "type": "string"
+                },
+                "question_public_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.AssignSectionRequest": {
+            "type": "object",
+            "required": [
+                "position",
+                "section_public_id"
+            ],
+            "properties": {
+                "position": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "section_public_id": {
+                    "type": "string"
+                }
+            }
+        },
         "model.AuthResponse": {
             "type": "object",
             "properties": {
@@ -370,6 +2943,29 @@
                 },
                 "user": {
                     "$ref": "#/definitions/model.UserResponse"
+                }
+            }
+        },
+        "model.BulkScoreConversionRequest": {
+            "type": "object",
+            "required": [
+                "conversions"
+            ],
+            "properties": {
+                "conversions": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/definitions/model.ScoreConversionRequest"
+                    }
+                }
+            }
+        },
+        "model.BulkScoreConversionResponse": {
+            "type": "object",
+            "properties": {
+                "total_saved": {
+                    "type": "integer"
                 }
             }
         },
@@ -393,6 +2989,115 @@
                 }
             }
         },
+        "model.ExamOptionResponse": {
+            "type": "object",
+            "properties": {
+                "label": {
+                    "type": "string"
+                },
+                "option_text": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "integer"
+                },
+                "public_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.ExamQuestionResponse": {
+            "type": "object",
+            "properties": {
+                "audio_url": {
+                    "type": "string"
+                },
+                "image_url": {
+                    "type": "string"
+                },
+                "number": {
+                    "type": "integer"
+                },
+                "options": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.ExamOptionResponse"
+                    }
+                },
+                "passage": {
+                    "type": "string"
+                },
+                "public_id": {
+                    "type": "string"
+                },
+                "question": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.ExamResultResponse": {
+            "type": "object",
+            "properties": {
+                "certificate_url": {
+                    "type": "string"
+                },
+                "final_score": {
+                    "type": "integer"
+                },
+                "min_passing_grade": {
+                    "type": "integer"
+                },
+                "period_title": {
+                    "type": "string"
+                },
+                "section_breakdowns": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.SectionBreakdownResponse"
+                    }
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.ExamSectionResponse": {
+            "type": "object",
+            "properties": {
+                "position": {
+                    "type": "integer"
+                },
+                "public_id": {
+                    "type": "string"
+                },
+                "questions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.ExamQuestionResponse"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.ExamSessionResponse": {
+            "type": "object",
+            "properties": {
+                "period_public_id": {
+                    "type": "string"
+                },
+                "sections": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.ExamSectionResponse"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "model.ForgotPasswordRequest": {
             "type": "object",
             "required": [
@@ -401,6 +3106,37 @@
             "properties": {
                 "email": {
                     "type": "string"
+                }
+            }
+        },
+        "model.ImportErrorDetail": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "row": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.ImportParticipantResponse": {
+            "type": "object",
+            "properties": {
+                "errors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.ImportErrorDetail"
+                    }
+                },
+                "total_imported": {
+                    "type": "integer"
+                },
+                "total_skipped": {
+                    "type": "integer"
                 }
             }
         },
@@ -416,6 +3152,334 @@
                 },
                 "password": {
                     "type": "string"
+                }
+            }
+        },
+        "model.OptionRequest": {
+            "type": "object",
+            "required": [
+                "option_text"
+            ],
+            "properties": {
+                "option_text": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.OptionResponse": {
+            "type": "object",
+            "properties": {
+                "label": {
+                    "type": "string"
+                },
+                "option_text": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "integer"
+                },
+                "public_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.ParticipantPeriodDetailResponse": {
+            "type": "object",
+            "properties": {
+                "end_time": {
+                    "type": "string"
+                },
+                "month": {
+                    "type": "string"
+                },
+                "participant_status": {
+                    "type": "string"
+                },
+                "public_id": {
+                    "type": "string"
+                },
+                "start_time": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "year": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.ParticipantPeriodListResponse": {
+            "type": "object",
+            "properties": {
+                "period": {
+                    "$ref": "#/definitions/model.PeriodSimpleInfo"
+                },
+                "public_id": {
+                    "type": "string"
+                },
+                "score": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.ParticipantResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "period_public_id": {
+                    "type": "string"
+                },
+                "public_id": {
+                    "type": "string"
+                },
+                "score": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/model.UserResponse"
+                }
+            }
+        },
+        "model.PeriodDetailResponse": {
+            "type": "object",
+            "properties": {
+                "certificate_exp_month": {
+                    "type": "string"
+                },
+                "certificate_url": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "end_time": {
+                    "type": "string"
+                },
+                "max_passing_grade": {
+                    "type": "integer"
+                },
+                "min_passing_grade": {
+                    "type": "integer"
+                },
+                "month": {
+                    "type": "string"
+                },
+                "public_id": {
+                    "type": "string"
+                },
+                "sections": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.PeriodSectionResponse"
+                    }
+                },
+                "start_time": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "year": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.PeriodResponse": {
+            "type": "object",
+            "properties": {
+                "certificate_exp_month": {
+                    "type": "string"
+                },
+                "certificate_url": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "end_time": {
+                    "type": "string"
+                },
+                "max_passing_grade": {
+                    "type": "integer"
+                },
+                "min_passing_grade": {
+                    "type": "integer"
+                },
+                "month": {
+                    "type": "string"
+                },
+                "public_id": {
+                    "type": "string"
+                },
+                "start_time": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "year": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.PeriodSectionResponse": {
+            "type": "object",
+            "properties": {
+                "period_section_public_id": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "integer"
+                },
+                "section_public_id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.PeriodSimpleInfo": {
+            "type": "object",
+            "properties": {
+                "end_time": {
+                    "type": "string"
+                },
+                "public_id": {
+                    "type": "string"
+                },
+                "start_time": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.QuestionDetailResponse": {
+            "type": "object",
+            "properties": {
+                "audio_url": {
+                    "type": "string"
+                },
+                "correct_option_public_id": {
+                    "type": "string"
+                },
+                "image_url": {
+                    "type": "string"
+                },
+                "number": {
+                    "type": "integer"
+                },
+                "options": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.OptionResponse"
+                    }
+                },
+                "passage": {
+                    "type": "string"
+                },
+                "public_id": {
+                    "type": "string"
+                },
+                "question": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.QuestionResponse": {
+            "type": "object",
+            "properties": {
+                "audio_url": {
+                    "type": "string"
+                },
+                "image_url": {
+                    "type": "string"
+                },
+                "number": {
+                    "type": "integer"
+                },
+                "passage": {
+                    "type": "string"
+                },
+                "public_id": {
+                    "type": "string"
+                },
+                "question": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.ReorderOptionsRequest": {
+            "type": "object",
+            "required": [
+                "option_public_ids"
+            ],
+            "properties": {
+                "option_public_ids": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "model.ReorderQuestionsRequest": {
+            "type": "object",
+            "required": [
+                "question_public_ids"
+            ],
+            "properties": {
+                "question_public_ids": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "model.ReorderSectionsRequest": {
+            "type": "object",
+            "required": [
+                "section_public_ids"
+            ],
+            "properties": {
+                "section_public_ids": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -435,9 +3499,212 @@
                 }
             }
         },
+        "model.SaveAnswerRequest": {
+            "type": "object",
+            "required": [
+                "option_public_id",
+                "question_public_id"
+            ],
+            "properties": {
+                "option_public_id": {
+                    "type": "string"
+                },
+                "question_public_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.SaveAnswerResponse": {
+            "type": "object",
+            "properties": {
+                "option_public_id": {
+                    "type": "string"
+                },
+                "question_public_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.ScoreConversionRequest": {
+            "type": "object",
+            "required": [
+                "section_type"
+            ],
+            "properties": {
+                "correct_count": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "scaled_score": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "section_type": {
+                    "type": "string",
+                    "enum": [
+                        "listening",
+                        "structure",
+                        "reading"
+                    ]
+                }
+            }
+        },
+        "model.ScoreConversionResponse": {
+            "type": "object",
+            "properties": {
+                "correct_count": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "scaled_score": {
+                    "type": "integer"
+                },
+                "section_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.SectionBreakdownResponse": {
+            "type": "object",
+            "properties": {
+                "correct_count": {
+                    "type": "integer"
+                },
+                "scaled_score": {
+                    "type": "integer"
+                },
+                "section_title": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.SectionDetailResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "public_id": {
+                    "type": "string"
+                },
+                "questions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.QuestionDetailResponse"
+                    }
+                },
+                "section_type": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.SectionRequest": {
+            "type": "object",
+            "required": [
+                "section_type",
+                "title"
+            ],
+            "properties": {
+                "section_type": {
+                    "type": "string",
+                    "enum": [
+                        "listening",
+                        "structure",
+                        "reading"
+                    ]
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.SectionResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "public_id": {
+                    "type": "string"
+                },
+                "section_type": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.SubmitExamResponse": {
+            "type": "object",
+            "properties": {
+                "period_public_id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "submitted_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.UpdateParticipantRequest": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "nim": {
+                    "type": "string"
+                },
+                "score": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "registered",
+                        "started",
+                        "completed"
+                    ]
+                },
+                "university": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.UpsertAnswerKeyRequest": {
+            "type": "object",
+            "required": [
+                "option_public_id"
+            ],
+            "properties": {
+                "option_public_id": {
+                    "type": "string"
+                }
+            }
+        },
         "model.UserResponse": {
             "type": "object",
             "properties": {
+                "created_at": {
+                    "type": "string"
+                },
                 "email": {
                     "type": "string"
                 },
@@ -472,6 +3739,29 @@
                 }
             }
         },
+        "response.PaginationMeta": {
+            "type": "object",
+            "properties": {
+                "filter": {
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "sort": {
+                    "type": "string"
+                },
+                "total_datas": {
+                    "type": "integer"
+                },
+                "total_pages": {
+                    "type": "integer"
+                }
+            }
+        },
         "response.Response": {
             "type": "object",
             "properties": {
@@ -492,6 +3782,24 @@
             "properties": {
                 "message": {
                     "type": "string"
+                },
+                "response_code": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.ResponsePaginated": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "message": {
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/definitions/response.PaginationMeta"
                 },
                 "response_code": {
                     "type": "integer"

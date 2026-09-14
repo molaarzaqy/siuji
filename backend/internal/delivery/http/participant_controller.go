@@ -18,6 +18,19 @@ func NewParticipantController(useCase *usecase.ParticipantUseCase) *ParticipantC
 	return &ParticipantController{UseCase: useCase}
 }
 
+// Add godoc
+// @Summary      Add participant to period
+// @Description  Creates the user account if the email doesn't exist yet. Password is auto-generated from NIM.
+// @Tags         Participant
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        period_public_id path string true "Period public ID"
+// @Param        request body model.AddParticipantRequest true "Participant data"
+// @Success      201 {object} response.Response{data=model.ParticipantResponse}
+// @Failure      404 {object} response.ResponseNoData
+// @Failure      409 {object} response.ResponseNoData
+// @Router       /periods/{period_public_id}/participants [post]
 func (ctrl *ParticipantController) Add(c fiber.Ctx) error {
 	request := new(model.AddParticipantRequest)
 	if err := c.Bind().Body(request); err != nil {
@@ -30,6 +43,19 @@ func (ctrl *ParticipantController) Add(c fiber.Ctx) error {
 	return response.Created(c, "Participant added to period successfully.", result)
 }
 
+// GetAll godoc
+// @Summary      List participants in a period
+// @Tags         Participant
+// @Produce      json
+// @Security     BearerAuth
+// @Param        period_public_id path string true "Period public ID"
+// @Param        page query int false "Page number" default(1)
+// @Param        limit query int false "Items per page" default(10)
+// @Param        filter query string false "Search by name/email/nim"
+// @Param        sort query string false "Sort field"
+// @Success      200 {object} response.ResponsePaginated{data=[]model.ParticipantResponse}
+// @Failure      404 {object} response.ResponseNoData
+// @Router       /periods/{period_public_id}/participants [get]
 func (ctrl *ParticipantController) GetAll(c fiber.Ctx) error {
 	page, _ := strconv.Atoi(c.Query("page", "1"))
 	limit, _ := strconv.Atoi(c.Query("limit", "10"))
@@ -53,6 +79,16 @@ func (ctrl *ParticipantController) GetAll(c fiber.Ctx) error {
 	return response.SuccessPagination(c, "List participant retrieved successfully.", participants, meta)
 }
 
+// GetDetail godoc
+// @Summary      Get participant detail
+// @Tags         Participant
+// @Produce      json
+// @Security     BearerAuth
+// @Param        period_public_id path string true "Period public ID"
+// @Param        user_public_id path string true "User public ID"
+// @Success      200 {object} response.Response{data=model.ParticipantResponse}
+// @Failure      404 {object} response.ResponseNoData
+// @Router       /periods/{period_public_id}/participants/{user_public_id} [get]
 func (ctrl *ParticipantController) GetDetail(c fiber.Ctx) error {
 	result, err := ctrl.UseCase.GetDetail(c.Params("period_public_id"), c.Params("user_public_id"))
 	if err != nil {
@@ -61,6 +97,19 @@ func (ctrl *ParticipantController) GetDetail(c fiber.Ctx) error {
 	return response.Success(c, "Participant detail retrieved successfully.", result)
 }
 
+// Update godoc
+// @Summary      Update participant
+// @Description  Partial update — only non-empty fields are applied. Changing NIM regenerates the password.
+// @Tags         Participant
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        period_public_id path string true "Period public ID"
+// @Param        user_public_id path string true "User public ID"
+// @Param        request body model.UpdateParticipantRequest true "Fields to update"
+// @Success      200 {object} response.Response{data=model.ParticipantResponse}
+// @Failure      404 {object} response.ResponseNoData
+// @Router       /periods/{period_public_id}/participants/{user_public_id} [put]
 func (ctrl *ParticipantController) Update(c fiber.Ctx) error {
 	request := new(model.UpdateParticipantRequest)
 	if err := c.Bind().Body(request); err != nil {
@@ -73,6 +122,16 @@ func (ctrl *ParticipantController) Update(c fiber.Ctx) error {
 	return response.Success(c, "Participant updated successfully.", result)
 }
 
+// Remove godoc
+// @Summary      Remove participant from period
+// @Tags         Participant
+// @Produce      json
+// @Security     BearerAuth
+// @Param        period_public_id path string true "Period public ID"
+// @Param        user_public_id path string true "User public ID"
+// @Success      200 {object} response.ResponseNoData
+// @Failure      404 {object} response.ResponseNoData
+// @Router       /periods/{period_public_id}/participants/{user_public_id} [delete]
 func (ctrl *ParticipantController) Remove(c fiber.Ctx) error {
 	err := ctrl.UseCase.Remove(c.Params("period_public_id"), c.Params("user_public_id"))
 	if err != nil {
@@ -81,6 +140,19 @@ func (ctrl *ParticipantController) Remove(c fiber.Ctx) error {
 	return response.SuccessNoData(c, "Participant removed from period successfully.")
 }
 
+// Import godoc
+// @Summary      Import participants from Excel
+// @Description  Columns (in order, header row skipped): Name, Email, NIM, University.
+// @Tags         Participant
+// @Accept       mpfd
+// @Produce      json
+// @Security     BearerAuth
+// @Param        period_public_id path string true "Period public ID"
+// @Param        file formData file true "Excel file (.xlsx)"
+// @Success      200 {object} response.Response{data=model.ImportParticipantResponse}
+// @Failure      400 {object} response.ResponseNoData
+// @Failure      404 {object} response.ResponseNoData
+// @Router       /periods/{period_public_id}/participants/import [post]
 func (ctrl *ParticipantController) Import(c fiber.Ctx) error {
 	fileHeader, err := c.FormFile("file")
 	if err != nil {

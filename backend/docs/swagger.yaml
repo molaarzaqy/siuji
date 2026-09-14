@@ -1,5 +1,42 @@
 basePath: /api/v1
 definitions:
+  model.AddParticipantRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      nim:
+        type: string
+      university:
+        type: string
+    required:
+    - email
+    - name
+    - nim
+    type: object
+  model.AnswerKeyResponse:
+    properties:
+      correct_option_public_id:
+        type: string
+      public_id:
+        type: string
+      question_public_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  model.AssignSectionRequest:
+    properties:
+      position:
+        minimum: 1
+        type: integer
+      section_public_id:
+        type: string
+    required:
+    - position
+    - section_public_id
+    type: object
   model.AuthResponse:
     properties:
       access_token:
@@ -12,6 +49,21 @@ definitions:
         type: string
       user:
         $ref: '#/definitions/model.UserResponse'
+    type: object
+  model.BulkScoreConversionRequest:
+    properties:
+      conversions:
+        items:
+          $ref: '#/definitions/model.ScoreConversionRequest'
+        minItems: 1
+        type: array
+    required:
+    - conversions
+    type: object
+  model.BulkScoreConversionResponse:
+    properties:
+      total_saved:
+        type: integer
     type: object
   model.ChangePasswordRequest:
     properties:
@@ -27,12 +79,103 @@ definitions:
     - new_password
     - old_password
     type: object
+  model.ExamOptionResponse:
+    properties:
+      label:
+        type: string
+      option_text:
+        type: string
+      position:
+        type: integer
+      public_id:
+        type: string
+    type: object
+  model.ExamQuestionResponse:
+    properties:
+      audio_url:
+        type: string
+      image_url:
+        type: string
+      number:
+        type: integer
+      options:
+        items:
+          $ref: '#/definitions/model.ExamOptionResponse'
+        type: array
+      passage:
+        type: string
+      public_id:
+        type: string
+      question:
+        type: string
+    type: object
+  model.ExamResultResponse:
+    properties:
+      certificate_url:
+        type: string
+      final_score:
+        type: integer
+      min_passing_grade:
+        type: integer
+      period_title:
+        type: string
+      section_breakdowns:
+        items:
+          $ref: '#/definitions/model.SectionBreakdownResponse'
+        type: array
+      status:
+        type: string
+    type: object
+  model.ExamSectionResponse:
+    properties:
+      position:
+        type: integer
+      public_id:
+        type: string
+      questions:
+        items:
+          $ref: '#/definitions/model.ExamQuestionResponse'
+        type: array
+      title:
+        type: string
+    type: object
+  model.ExamSessionResponse:
+    properties:
+      period_public_id:
+        type: string
+      sections:
+        items:
+          $ref: '#/definitions/model.ExamSectionResponse'
+        type: array
+      title:
+        type: string
+    type: object
   model.ForgotPasswordRequest:
     properties:
       email:
         type: string
     required:
     - email
+    type: object
+  model.ImportErrorDetail:
+    properties:
+      email:
+        type: string
+      message:
+        type: string
+      row:
+        type: integer
+    type: object
+  model.ImportParticipantResponse:
+    properties:
+      errors:
+        items:
+          $ref: '#/definitions/model.ImportErrorDetail'
+        type: array
+      total_imported:
+        type: integer
+      total_skipped:
+        type: integer
     type: object
   model.LoginRequest:
     properties:
@@ -43,6 +186,221 @@ definitions:
     required:
     - email
     - password
+    type: object
+  model.OptionRequest:
+    properties:
+      option_text:
+        type: string
+    required:
+    - option_text
+    type: object
+  model.OptionResponse:
+    properties:
+      label:
+        type: string
+      option_text:
+        type: string
+      position:
+        type: integer
+      public_id:
+        type: string
+    type: object
+  model.ParticipantPeriodDetailResponse:
+    properties:
+      end_time:
+        type: string
+      month:
+        type: string
+      participant_status:
+        type: string
+      public_id:
+        type: string
+      start_time:
+        type: string
+      title:
+        type: string
+      year:
+        type: integer
+    type: object
+  model.ParticipantPeriodListResponse:
+    properties:
+      period:
+        $ref: '#/definitions/model.PeriodSimpleInfo'
+      public_id:
+        type: string
+      score:
+        type: integer
+      status:
+        type: string
+    type: object
+  model.ParticipantResponse:
+    properties:
+      created_at:
+        type: string
+      period_public_id:
+        type: string
+      public_id:
+        type: string
+      score:
+        type: integer
+      status:
+        type: string
+      updated_at:
+        type: string
+      user:
+        $ref: '#/definitions/model.UserResponse'
+    type: object
+  model.PeriodDetailResponse:
+    properties:
+      certificate_exp_month:
+        type: string
+      certificate_url:
+        type: string
+      created_at:
+        type: string
+      end_time:
+        type: string
+      max_passing_grade:
+        type: integer
+      min_passing_grade:
+        type: integer
+      month:
+        type: string
+      public_id:
+        type: string
+      sections:
+        items:
+          $ref: '#/definitions/model.PeriodSectionResponse'
+        type: array
+      start_time:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+      year:
+        type: integer
+    type: object
+  model.PeriodResponse:
+    properties:
+      certificate_exp_month:
+        type: string
+      certificate_url:
+        type: string
+      created_at:
+        type: string
+      end_time:
+        type: string
+      max_passing_grade:
+        type: integer
+      min_passing_grade:
+        type: integer
+      month:
+        type: string
+      public_id:
+        type: string
+      start_time:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+      year:
+        type: integer
+    type: object
+  model.PeriodSectionResponse:
+    properties:
+      period_section_public_id:
+        type: string
+      position:
+        type: integer
+      section_public_id:
+        type: string
+      title:
+        type: string
+    type: object
+  model.PeriodSimpleInfo:
+    properties:
+      end_time:
+        type: string
+      public_id:
+        type: string
+      start_time:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+    type: object
+  model.QuestionDetailResponse:
+    properties:
+      audio_url:
+        type: string
+      correct_option_public_id:
+        type: string
+      image_url:
+        type: string
+      number:
+        type: integer
+      options:
+        items:
+          $ref: '#/definitions/model.OptionResponse'
+        type: array
+      passage:
+        type: string
+      public_id:
+        type: string
+      question:
+        type: string
+    type: object
+  model.QuestionResponse:
+    properties:
+      audio_url:
+        type: string
+      image_url:
+        type: string
+      number:
+        type: integer
+      passage:
+        type: string
+      public_id:
+        type: string
+      question:
+        type: string
+    type: object
+  model.ReorderOptionsRequest:
+    properties:
+      option_public_ids:
+        items:
+          type: string
+        minItems: 1
+        type: array
+    required:
+    - option_public_ids
+    type: object
+  model.ReorderQuestionsRequest:
+    properties:
+      question_public_ids:
+        items:
+          type: string
+        minItems: 1
+        type: array
+    required:
+    - question_public_ids
+    type: object
+  model.ReorderSectionsRequest:
+    properties:
+      section_public_ids:
+        items:
+          type: string
+        minItems: 1
+        type: array
+    required:
+    - section_public_ids
     type: object
   model.ResetPasswordRequest:
     properties:
@@ -55,8 +413,143 @@ definitions:
     - confirm_new_password
     - new_password
     type: object
+  model.SaveAnswerRequest:
+    properties:
+      option_public_id:
+        type: string
+      question_public_id:
+        type: string
+    required:
+    - option_public_id
+    - question_public_id
+    type: object
+  model.SaveAnswerResponse:
+    properties:
+      option_public_id:
+        type: string
+      question_public_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  model.ScoreConversionRequest:
+    properties:
+      correct_count:
+        minimum: 0
+        type: integer
+      scaled_score:
+        minimum: 0
+        type: integer
+      section_type:
+        enum:
+        - listening
+        - structure
+        - reading
+        type: string
+    required:
+    - section_type
+    type: object
+  model.ScoreConversionResponse:
+    properties:
+      correct_count:
+        type: integer
+      id:
+        type: integer
+      scaled_score:
+        type: integer
+      section_type:
+        type: string
+    type: object
+  model.SectionBreakdownResponse:
+    properties:
+      correct_count:
+        type: integer
+      scaled_score:
+        type: integer
+      section_title:
+        type: string
+    type: object
+  model.SectionDetailResponse:
+    properties:
+      created_at:
+        type: string
+      public_id:
+        type: string
+      questions:
+        items:
+          $ref: '#/definitions/model.QuestionDetailResponse'
+        type: array
+      section_type:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  model.SectionRequest:
+    properties:
+      section_type:
+        enum:
+        - listening
+        - structure
+        - reading
+        type: string
+      title:
+        type: string
+    required:
+    - section_type
+    - title
+    type: object
+  model.SectionResponse:
+    properties:
+      created_at:
+        type: string
+      public_id:
+        type: string
+      section_type:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  model.SubmitExamResponse:
+    properties:
+      period_public_id:
+        type: string
+      status:
+        type: string
+      submitted_at:
+        type: string
+    type: object
+  model.UpdateParticipantRequest:
+    properties:
+      name:
+        type: string
+      nim:
+        type: string
+      score:
+        type: integer
+      status:
+        enum:
+        - registered
+        - started
+        - completed
+        type: string
+      university:
+        type: string
+    type: object
+  model.UpsertAnswerKeyRequest:
+    properties:
+      option_public_id:
+        type: string
+    required:
+    - option_public_id
+    type: object
   model.UserResponse:
     properties:
+      created_at:
+        type: string
       email:
         type: string
       name:
@@ -79,6 +572,21 @@ definitions:
     required:
     - otp_code
     type: object
+  response.PaginationMeta:
+    properties:
+      filter:
+        type: string
+      limit:
+        type: integer
+      page:
+        type: integer
+      sort:
+        type: string
+      total_datas:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
   response.Response:
     properties:
       data: {}
@@ -93,6 +601,18 @@ definitions:
     properties:
       message:
         type: string
+      response_code:
+        type: integer
+      status:
+        type: string
+    type: object
+  response.ResponsePaginated:
+    properties:
+      data: {}
+      message:
+        type: string
+      meta:
+        $ref: '#/definitions/response.PaginationMeta'
       response_code:
         type: integer
       status:
@@ -314,6 +834,1535 @@ paths:
       summary: Verify OTP
       tags:
       - Auth
+  /options/{option_public_id}:
+    delete:
+      parameters:
+      - description: Option public ID
+        in: path
+        name: option_public_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Delete option
+      tags:
+      - Option
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Option public ID
+        in: path
+        name: option_public_id
+        required: true
+        type: string
+      - description: Option data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.OptionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.OptionResponse'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Update option
+      tags:
+      - Option
+  /participant/periods:
+    get:
+      description: Get periods the logged-in participant is registered for.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/model.ParticipantPeriodListResponse'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: List my exam periods
+      tags:
+      - ParticipantExam
+  /participant/periods/{period_public_id}:
+    get:
+      parameters:
+      - description: Period public ID
+        in: path
+        name: period_public_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.ParticipantPeriodDetailResponse'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Get my exam period detail
+      tags:
+      - ParticipantExam
+  /participant/periods/{period_public_id}/answers:
+    post:
+      consumes:
+      - application/json
+      description: Can be called repeatedly while the exam is in progress — upserts
+        by question.
+      parameters:
+      - description: Period public ID
+        in: path
+        name: period_public_id
+        required: true
+        type: string
+      - description: Answer
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.SaveAnswerRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.SaveAnswerResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Save/update an answer
+      tags:
+      - ParticipantExam
+  /participant/periods/{period_public_id}/result:
+    get:
+      description: Returns the final score, section breakdown, and certificate URL
+        (generated on first request if passed).
+      parameters:
+      - description: Period public ID
+        in: path
+        name: period_public_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.ExamResultResponse'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Get exam result
+      tags:
+      - ParticipantExam
+  /participant/periods/{period_public_id}/start:
+    post:
+      description: Marks the exam as started and returns all sections/questions (without
+        correct answers).
+      parameters:
+      - description: Period public ID
+        in: path
+        name: period_public_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.ExamSessionResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Start exam
+      tags:
+      - ParticipantExam
+  /participant/periods/{period_public_id}/submit:
+    post:
+      description: Finalizes the exam, computes section scores and the final TOEFL
+        score.
+      parameters:
+      - description: Period public ID
+        in: path
+        name: period_public_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.SubmitExamResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Submit exam
+      tags:
+      - ParticipantExam
+  /periods:
+    get:
+      description: Get a paginated list of exam periods.
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Search by title
+        in: query
+        name: filter
+        type: string
+      - description: Sort field, e.g. -created_at
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponsePaginated'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/model.PeriodResponse'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: List periods
+      tags:
+      - Period
+    post:
+      consumes:
+      - multipart/form-data
+      description: Create a new exam period with a certificate template image.
+      parameters:
+      - description: Period title
+        in: formData
+        name: title
+        required: true
+        type: string
+      - description: Month
+        in: formData
+        name: month
+        required: true
+        type: string
+      - description: Year
+        in: formData
+        name: year
+        required: true
+        type: integer
+      - description: draft, published, or closed
+        in: formData
+        name: status
+        required: true
+        type: string
+      - description: RFC3339 datetime
+        in: formData
+        name: certificate_exp_month
+        type: string
+      - description: Minimum passing grade
+        in: formData
+        name: min_passing_grade
+        type: integer
+      - description: Maximum passing grade
+        in: formData
+        name: max_passing_grade
+        type: integer
+      - description: RFC3339 datetime
+        in: formData
+        name: start_time
+        required: true
+        type: string
+      - description: RFC3339 datetime
+        in: formData
+        name: end_time
+        required: true
+        type: string
+      - description: Certificate template image (JPEG/PNG)
+        in: formData
+        name: certificate_template
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.PeriodResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Create period
+      tags:
+      - Period
+  /periods/{period_public_id}:
+    delete:
+      parameters:
+      - description: Period public ID
+        in: path
+        name: period_public_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Delete period
+      tags:
+      - Period
+    get:
+      description: Get a period with its assigned sections.
+      parameters:
+      - description: Period public ID
+        in: path
+        name: period_public_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.PeriodDetailResponse'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Get period detail
+      tags:
+      - Period
+    put:
+      consumes:
+      - multipart/form-data
+      description: Update a period. certificate_template is optional — omit to keep
+        the existing one.
+      parameters:
+      - description: Period public ID
+        in: path
+        name: period_public_id
+        required: true
+        type: string
+      - description: Period title
+        in: formData
+        name: title
+        required: true
+        type: string
+      - description: Month
+        in: formData
+        name: month
+        required: true
+        type: string
+      - description: Year
+        in: formData
+        name: year
+        required: true
+        type: integer
+      - description: draft, published, or closed
+        in: formData
+        name: status
+        required: true
+        type: string
+      - description: RFC3339 datetime
+        in: formData
+        name: certificate_exp_month
+        type: string
+      - description: Minimum passing grade
+        in: formData
+        name: min_passing_grade
+        type: integer
+      - description: Maximum passing grade
+        in: formData
+        name: max_passing_grade
+        type: integer
+      - description: RFC3339 datetime
+        in: formData
+        name: start_time
+        required: true
+        type: string
+      - description: RFC3339 datetime
+        in: formData
+        name: end_time
+        required: true
+        type: string
+      - description: New certificate template (optional)
+        in: formData
+        name: certificate_template
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.PeriodResponse'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Update period
+      tags:
+      - Period
+  /periods/{period_public_id}/participants:
+    get:
+      parameters:
+      - description: Period public ID
+        in: path
+        name: period_public_id
+        required: true
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Search by name/email/nim
+        in: query
+        name: filter
+        type: string
+      - description: Sort field
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponsePaginated'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/model.ParticipantResponse'
+                  type: array
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: List participants in a period
+      tags:
+      - Participant
+    post:
+      consumes:
+      - application/json
+      description: Creates the user account if the email doesn't exist yet. Password
+        is auto-generated from NIM.
+      parameters:
+      - description: Period public ID
+        in: path
+        name: period_public_id
+        required: true
+        type: string
+      - description: Participant data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.AddParticipantRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.ParticipantResponse'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Add participant to period
+      tags:
+      - Participant
+  /periods/{period_public_id}/participants/{user_public_id}:
+    delete:
+      parameters:
+      - description: Period public ID
+        in: path
+        name: period_public_id
+        required: true
+        type: string
+      - description: User public ID
+        in: path
+        name: user_public_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Remove participant from period
+      tags:
+      - Participant
+    get:
+      parameters:
+      - description: Period public ID
+        in: path
+        name: period_public_id
+        required: true
+        type: string
+      - description: User public ID
+        in: path
+        name: user_public_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.ParticipantResponse'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Get participant detail
+      tags:
+      - Participant
+    put:
+      consumes:
+      - application/json
+      description: Partial update — only non-empty fields are applied. Changing NIM
+        regenerates the password.
+      parameters:
+      - description: Period public ID
+        in: path
+        name: period_public_id
+        required: true
+        type: string
+      - description: User public ID
+        in: path
+        name: user_public_id
+        required: true
+        type: string
+      - description: Fields to update
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdateParticipantRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.ParticipantResponse'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Update participant
+      tags:
+      - Participant
+  /periods/{period_public_id}/participants/import:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 'Columns (in order, header row skipped): Name, Email, NIM, University.'
+      parameters:
+      - description: Period public ID
+        in: path
+        name: period_public_id
+        required: true
+        type: string
+      - description: Excel file (.xlsx)
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.ImportParticipantResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Import participants from Excel
+      tags:
+      - Participant
+  /periods/{period_public_id}/sections:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Period public ID
+        in: path
+        name: period_public_id
+        required: true
+        type: string
+      - description: Section to assign
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.AssignSectionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.PeriodSectionResponse'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Assign section to period
+      tags:
+      - Period
+  /periods/{period_public_id}/sections/{section_public_id}:
+    delete:
+      parameters:
+      - description: Period public ID
+        in: path
+        name: period_public_id
+        required: true
+        type: string
+      - description: Section public ID
+        in: path
+        name: section_public_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Remove section from period
+      tags:
+      - Period
+  /periods/{period_public_id}/sections/reorder:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Period public ID
+        in: path
+        name: period_public_id
+        required: true
+        type: string
+      - description: Ordered list of section public IDs
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.ReorderSectionsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Reorder sections within a period
+      tags:
+      - Period
+  /questions/{question_public_id}:
+    delete:
+      parameters:
+      - description: Question public ID
+        in: path
+        name: question_public_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Delete question
+      tags:
+      - Question
+    get:
+      description: Get a question with its options and correct answer.
+      parameters:
+      - description: Question public ID
+        in: path
+        name: question_public_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.QuestionDetailResponse'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Get question detail
+      tags:
+      - Question
+    put:
+      consumes:
+      - multipart/form-data
+      description: Update question text/passage. audio/image are optional — omit to
+        keep the existing files.
+      parameters:
+      - description: Question public ID
+        in: path
+        name: question_public_id
+        required: true
+        type: string
+      - description: Question text
+        in: formData
+        name: question
+        required: true
+        type: string
+      - description: Reading passage
+        in: formData
+        name: passage
+        type: string
+      - description: New audio file (optional)
+        in: formData
+        name: audio
+        type: file
+      - description: New image file (optional)
+        in: formData
+        name: image
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.QuestionResponse'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Update question
+      tags:
+      - Question
+  /questions/{question_public_id}/answer-key:
+    put:
+      consumes:
+      - application/json
+      description: Create or update the answer key. The option must belong to the
+        given question.
+      parameters:
+      - description: Question public ID
+        in: path
+        name: question_public_id
+        required: true
+        type: string
+      - description: Correct option
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpsertAnswerKeyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.AnswerKeyResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Set correct answer for a question
+      tags:
+      - AnswerKey
+  /questions/{question_public_id}/options:
+    post:
+      consumes:
+      - application/json
+      description: Create a new answer option for a question. Label (A, B, C, ...)
+        is auto-derived from position.
+      parameters:
+      - description: Question public ID
+        in: path
+        name: question_public_id
+        required: true
+        type: string
+      - description: Option data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.OptionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.OptionResponse'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Create option
+      tags:
+      - Option
+  /questions/{question_public_id}/options/reorder:
+    put:
+      consumes:
+      - application/json
+      description: Labels (A, B, C, ...) are automatically reassigned to match the
+        new order.
+      parameters:
+      - description: Question public ID
+        in: path
+        name: question_public_id
+        required: true
+        type: string
+      - description: Ordered list of option public IDs
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.ReorderOptionsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Reorder options within a question
+      tags:
+      - Option
+  /score-conversions:
+    get:
+      parameters:
+      - description: Filter by listening, structure, or reading
+        in: query
+        name: section_type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/model.ScoreConversionResponse'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: List score conversions
+      tags:
+      - ScoreConversion
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Conversion entry
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.ScoreConversionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.ScoreConversionResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Create score conversion entry
+      tags:
+      - ScoreConversion
+  /score-conversions/{id}:
+    delete:
+      parameters:
+      - description: Score conversion ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Delete score conversion entry
+      tags:
+      - ScoreConversion
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Score conversion ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Conversion entry
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.ScoreConversionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.ScoreConversionResponse'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Update score conversion entry
+      tags:
+      - ScoreConversion
+  /score-conversions/bulk:
+    post:
+      consumes:
+      - application/json
+      description: Insert or update multiple entries at once, keyed by (section_type,
+        correct_count).
+      parameters:
+      - description: List of conversion entries
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.BulkScoreConversionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.BulkScoreConversionResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Bulk upsert score conversions
+      tags:
+      - ScoreConversion
+  /sections:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/model.SectionResponse'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: List sections
+      tags:
+      - Section
+    post:
+      consumes:
+      - application/json
+      description: Create a new section (question bank). section_type must be listening,
+        structure, or reading.
+      parameters:
+      - description: Section data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.SectionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.SectionResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Create section
+      tags:
+      - Section
+  /sections/{section_public_id}:
+    delete:
+      parameters:
+      - description: Section public ID
+        in: path
+        name: section_public_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Delete section
+      tags:
+      - Section
+    get:
+      description: Get a section with its questions, options, and correct answers.
+      parameters:
+      - description: Section public ID
+        in: path
+        name: section_public_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.SectionDetailResponse'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Get section detail
+      tags:
+      - Section
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Section public ID
+        in: path
+        name: section_public_id
+        required: true
+        type: string
+      - description: Section data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.SectionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.SectionResponse'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Update section
+      tags:
+      - Section
+  /sections/{section_public_id}/questions:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Create a new question in a section. audio and image files are optional
+        depending on section type.
+      parameters:
+      - description: Section public ID
+        in: path
+        name: section_public_id
+        required: true
+        type: string
+      - description: Question text
+        in: formData
+        name: question
+        required: true
+        type: string
+      - description: Reading passage (for Reading section)
+        in: formData
+        name: passage
+        type: string
+      - description: Audio file (for Listening section)
+        in: formData
+        name: audio
+        type: file
+      - description: Image file (optional)
+        in: formData
+        name: image
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.QuestionResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Create question
+      tags:
+      - Question
+  /sections/{section_public_id}/questions/reorder:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Section public ID
+        in: path
+        name: section_public_id
+        required: true
+        type: string
+      - description: Ordered list of question public IDs
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.ReorderQuestionsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Reorder questions within a section
+      tags:
+      - Question
+  /users:
+    get:
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Search by name/email/nim/university
+        in: query
+        name: filter
+        type: string
+      - description: Sort field
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponsePaginated'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/model.UserResponse'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: List users
+      tags:
+      - User
+  /users/{user_public_id}:
+    delete:
+      parameters:
+      - description: User public ID
+        in: path
+        name: user_public_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Delete user
+      tags:
+      - User
+    get:
+      parameters:
+      - description: User public ID
+        in: path
+        name: user_public_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.UserResponse'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ResponseNoData'
+      security:
+      - BearerAuth: []
+      summary: Get user detail
+      tags:
+      - User
 securityDefinitions:
   BearerAuth:
     description: Type "Bearer" followed by a space and JWT access token.

@@ -30,7 +30,14 @@ func (ctrl *ParticipantExamController) getUserID(c fiber.Ctx) (uint, error) {
 	return 0, fiber.NewError(fiber.StatusUnauthorized, "unauthorized: user id not found in token")
 }
 
-// 1. GET /api/v1/participant/periods
+// GetPeriods godoc
+// @Summary      List my exam periods
+// @Description  Get periods the logged-in participant is registered for.
+// @Tags         ParticipantExam
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200 {object} response.Response{data=[]model.ParticipantPeriodListResponse}
+// @Router       /participant/periods [get]
 func (ctrl *ParticipantExamController) GetPeriods(c fiber.Ctx) error {
 	userID, err := ctrl.getUserID(c)
 	if err != nil {
@@ -44,7 +51,15 @@ func (ctrl *ParticipantExamController) GetPeriods(c fiber.Ctx) error {
 	return response.Success(c, "Participant periods retrieved successfully.", result)
 }
 
-// 2. GET /api/v1/participant/periods/:period_public_id
+// GetPeriodDetail godoc
+// @Summary      Get my exam period detail
+// @Tags         ParticipantExam
+// @Produce      json
+// @Security     BearerAuth
+// @Param        period_public_id path string true "Period public ID"
+// @Success      200 {object} response.Response{data=model.ParticipantPeriodDetailResponse}
+// @Failure      404 {object} response.ResponseNoData
+// @Router       /participant/periods/{period_public_id} [get]
 func (ctrl *ParticipantExamController) GetPeriodDetail(c fiber.Ctx) error {
 	userID, err := ctrl.getUserID(c)
 	if err != nil {
@@ -58,7 +73,17 @@ func (ctrl *ParticipantExamController) GetPeriodDetail(c fiber.Ctx) error {
 	return response.Success(c, "Period detail retrieved successfully.", result)
 }
 
-// 3. POST /api/v1/participant/periods/:period_public_id/start
+// StartExam godoc
+// @Summary      Start exam
+// @Description  Marks the exam as started and returns all sections/questions (without correct answers).
+// @Tags         ParticipantExam
+// @Produce      json
+// @Security     BearerAuth
+// @Param        period_public_id path string true "Period public ID"
+// @Success      200 {object} response.Response{data=model.ExamSessionResponse}
+// @Failure      400 {object} response.ResponseNoData
+// @Failure      404 {object} response.ResponseNoData
+// @Router       /participant/periods/{period_public_id}/start [post]
 func (ctrl *ParticipantExamController) StartExam(c fiber.Ctx) error {
 	userID, err := ctrl.getUserID(c)
 	if err != nil {
@@ -72,7 +97,19 @@ func (ctrl *ParticipantExamController) StartExam(c fiber.Ctx) error {
 	return response.Success(c, "Exam session started successfully.", result)
 }
 
-// 4. POST /api/v1/participant/periods/:period_public_id/answers
+// SaveAnswer godoc
+// @Summary      Save/update an answer
+// @Description  Can be called repeatedly while the exam is in progress — upserts by question.
+// @Tags         ParticipantExam
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        period_public_id path string true "Period public ID"
+// @Param        request body model.SaveAnswerRequest true "Answer"
+// @Success      200 {object} response.Response{data=model.SaveAnswerResponse}
+// @Failure      400 {object} response.ResponseNoData
+// @Failure      404 {object} response.ResponseNoData
+// @Router       /participant/periods/{period_public_id}/answers [post]
 func (ctrl *ParticipantExamController) SaveAnswer(c fiber.Ctx) error {
 	userID, err := ctrl.getUserID(c)
 	if err != nil {
@@ -91,7 +128,17 @@ func (ctrl *ParticipantExamController) SaveAnswer(c fiber.Ctx) error {
 	return response.Success(c, "Answer saved successfully.", result)
 }
 
-// 5. POST /api/v1/participant/periods/:period_public_id/submit
+// SubmitExam godoc
+// @Summary      Submit exam
+// @Description  Finalizes the exam, computes section scores and the final TOEFL score.
+// @Tags         ParticipantExam
+// @Produce      json
+// @Security     BearerAuth
+// @Param        period_public_id path string true "Period public ID"
+// @Success      200 {object} response.Response{data=model.SubmitExamResponse}
+// @Failure      400 {object} response.ResponseNoData
+// @Failure      404 {object} response.ResponseNoData
+// @Router       /participant/periods/{period_public_id}/submit [post]
 func (ctrl *ParticipantExamController) SubmitExam(c fiber.Ctx) error {
 	userID, err := ctrl.getUserID(c)
 	if err != nil {
@@ -105,7 +152,16 @@ func (ctrl *ParticipantExamController) SubmitExam(c fiber.Ctx) error {
 	return response.Success(c, "Exam submitted successfully.", result)
 }
 
-// 6. GET /api/v1/participant/periods/:period_public_id/result
+// GetResult godoc
+// @Summary      Get exam result
+// @Description  Returns the final score, section breakdown, and certificate URL (generated on first request if passed).
+// @Tags         ParticipantExam
+// @Produce      json
+// @Security     BearerAuth
+// @Param        period_public_id path string true "Period public ID"
+// @Success      200 {object} response.Response{data=model.ExamResultResponse}
+// @Failure      404 {object} response.ResponseNoData
+// @Router       /participant/periods/{period_public_id}/result [get]
 func (ctrl *ParticipantExamController) GetResult(c fiber.Ctx) error {
 	userID, err := ctrl.getUserID(c)
 	if err != nil {
