@@ -9,8 +9,8 @@ import (
 type ParticipantAnswer struct {
 	ID                  uint              `gorm:"column:id;primaryKey"`
 	PublicID            uuid.UUID         `gorm:"column:public_id"`
-	ParticipantPeriodID uint              `gorm:"column:participant_period_id"`
-	QuestionID          uint              `gorm:"column:question_id"`
+	ParticipantPeriodID uint              `gorm:"column:participant_period_id;uniqueIndex:idx_pp_q"`
+	QuestionID          uint              `gorm:"column:question_id;uniqueIndex:idx_pp_q"`
 	OptionID            uint              `gorm:"column:option_id"`
 	IsCorrect           bool              `gorm:"column:is_correct"`
 	CreatedAt           time.Time         `gorm:"column:created_at"`

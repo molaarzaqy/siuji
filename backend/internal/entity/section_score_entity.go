@@ -9,8 +9,8 @@ import (
 type SectionScore struct {
 	ID                  uint              `gorm:"column:id;primaryKey"`
 	PublicID            uuid.UUID         `gorm:"column:public_id"`
-	ParticipantPeriodID uint              `gorm:"column:participant_period_id"`
-	SectionID           uint              `gorm:"column:section_id"`
+	ParticipantPeriodID uint              `gorm:"column:participant_period_id;uniqueIndex:idx_pp_sec"`
+	SectionID           uint              `gorm:"column:section_id;uniqueIndex:idx_pp_sec"`
 	CorrectCount        int               `gorm:"column:correct_count"`
 	RawScore            int               `gorm:"column:raw_score"`
 	ScaledScore         int               `gorm:"column:scaled_score"`
