@@ -1,5 +1,4 @@
 // SIUJI layouts
-import LandingPage from "layouts/landing";
 import Default from "layouts/dashboards/default";
 import Periods from "layouts/admin/periods";
 import PeriodDetail from "layouts/admin/period-detail";
@@ -32,16 +31,6 @@ import CustomerSupport from "examples/Icons/CustomerSupport";
 import SettingsIcon from "examples/Icons/Settings";
 
 const routes = [
-  // ── Landing Page ───────────────────────────────────────
-  {
-    type: "collapse",
-    name: "Beranda",
-    key: "landing",
-    route: "/",
-    component: <LandingPage />,
-    noCollapse: true,
-  },
-
   // ── Admin: Dashboard ───────────────────────────────────
   {
     type: "collapse",

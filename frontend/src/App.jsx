@@ -15,6 +15,7 @@ import SoftBox from "components/SoftBox";
 import Sidenav from "examples/Sidenav";
 import Configurator from "examples/Configurator";
 import PrivateRoute, { PublicRoute, RoleRoute } from "examples/PrivateRoute";
+import LandingPage from "layouts/landing";
 import { useAuth } from "context/auth/AuthContext";
 
 //  PRO React themes
@@ -101,17 +102,6 @@ export default function App() {
       }
 
       if (route.route) {
-        // Public routes
-        if (route.route === "/") {
-          return (
-            <Route
-              exact
-              path={route.route}
-              element={<PublicRoute>{route.component}</PublicRoute>}
-              key={route.key}
-            />
-          );
-        }
 
         // Authentication routes
         if (route.route.includes("/authentication/") && route.route !== "/authentication/reset-password/update") {
@@ -141,18 +131,6 @@ export default function App() {
       }
 
       return null;
-    });
-
-  const configsButton = (
-    <SoftBox
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      width="3.5rem"
-      height="3.5rem"
-      bgColor="white"
-      shadow="sm"
-      borderRadius="50%"
     });
 
   const configsButton = (
@@ -199,6 +177,7 @@ export default function App() {
           </>
         )}
         <Routes>
+          <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
           {getRoutes(routes)}
           <Route path="*" element={<Navigate to={user?.role === "participant" ? "/participant/periods" : "/dashboards/default"} />} />
         </Routes>
@@ -221,7 +200,8 @@ export default function App() {
         </>
       )}
       <Routes>
-        {getRoutes(routes)}
+          <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
+          {getRoutes(routes)}
         <Route path="*" element={<Navigate to={user?.role === "participant" ? "/participant/periods" : "/dashboards/default"} />} />
       </Routes>
     </ThemeProvider>
