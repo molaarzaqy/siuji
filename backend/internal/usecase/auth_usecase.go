@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"crypto/subtle"
+	"fmt"
 	"siuji-backend/internal/entity"
 	"siuji-backend/internal/model"
 	"siuji-backend/internal/model/converter"
@@ -16,7 +18,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const OTPValidDuration = 5
+const (
+	OTPValidDuration = 5
+	MaxOTPAttempts = 5
+)
 
 type AuthUseCase struct {
 	Log 		   *logrus.Logger
@@ -141,22 +146,43 @@ func (c *AuthUseCase) VerifyOTP(request *model.VerifyOTPRequest) (*model.AuthRes
 		return nil, fiber.NewError(fiber.StatusNotFound, "user not found")
 	}
 
-	_, err = c.OTPRepository.FindValidByEmailAndCode(user.Email, request.OTPCode, otp.PurposeResetPassword)
+	otpRecord, err := c.OTPRepository.FindValidByEmailAndPurpose(user.Email, otp.PurposeResetPassword)
 	if err != nil {
-		c.Log.Warnf("invalid or expired OTP for user %d", request.UserID)
-		return nil, fiber.NewError(fiber.StatusBadRequest, "invalid or expired OTP")
+		c.Log.Warnf("no valid OTP found for user %d", request.UserID)
+		return nil, fiber.NewError(fiber.StatusBadRequest, "invalid or expires OTP")
 	}
+	// batas percobaan tercapai: hanguskan OTP, paksa minta kode baru
+	if otpRecord.Attempts >= MaxOTPAttempts {
+		c.Log.Warnf("OTP attempts limit exceeded for user %d, invalidating code", request.UserID)
+		if err := c.OTPRepository.DeleteByEmail(user.Email); err != nil {
+			c.Log.Errorf("failedd to invalidate OTP after attempts limmit: %+v", err)
+		}
+		return nil, fiber.NewError(fiber.StatusTooManyRequests, "to many failed attempts, please request a new OTP code")
+	}
+	// Perbandingan waktu-konstan supaya durasi respons tidak membocorkan
+	// seberapa banyak digit awal yang sudah benar.
+	if subtle.ConstantTimeCompare([]byte(otpRecord.Code), []byte(request.OTPCode)) != 1 {
+		if err := c.OTPRepository.IncrementAttempts(otpRecord.ID); err != nil {
+			c.Log.Errorf("failed to increment OTP attempts: %+v", err)
+		}
+		remaining := MaxOTPAttempts - (otpRecord.Attempts + 1)
+		c.Log.Warnf("incorrect OTP for user %d, %d attempts remaining", request.UserID, remaining)
 
+		if remaining <= 0 {
+			return nil, fiber.NewError(fiber.StatusTooManyRequests, "to many failed attempts, please request a new OTP code")
+		}
+		return nil, fiber.NewErrorf(fiber.StatusBadRequest, 
+			fmt.Sprintf("invalid OTP code, %d attempt(s) remaining", remaining))
+	}
 	if err := c.OTPRepository.DeleteByEmail(user.Email); err != nil {
 		c.Log.Errorf("failed to cleanup OTP: %+v", err)
 	}
-
+	
 	tempToken, err := c.JWTManager.GenerateTempToken(user.ID, user.Email, jwt.PurposeResetPassword, 5)
 	if err != nil {
 		c.Log.Errorf("failed to generate temp token: %+v", err)
 		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to process request")
 	}
-
 	return &model.AuthResponse{
 		TempToken: tempToken,
 		ExpiresIn: 5 * 60,

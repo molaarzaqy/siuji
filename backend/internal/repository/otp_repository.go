@@ -10,7 +10,8 @@ import (
 
 type OTPRepository interface {
 	Create(otp *entity.OTP) error
-	FindValidByEmailAndCode(email, code, purpose string) (*entity.OTP, error)
+	FindValidByEmailAndPurpose(email, purpose string) (*entity.OTP, error)
+	IncrementAttempts(id uint) error
 	DeleteByEmail(email string) error
 	DeleteExpired() error
 }
@@ -27,21 +28,26 @@ func (r *otpRepository) Create(otp *entity.OTP) error {
 	return r.db.Create(otp).Error
 }
 
-func (r *otpRepository) FindValidByEmailAndCode(email, code, purpose string) (*entity.OTP, error) {
+func (r *otpRepository) FindValidByEmailAndPurpose(email, purpose string) (*entity.OTP, error) {
 	var otp entity.OTP
-	now := time.Now()
-
 	err := r.db.
-		Where("email = ? AND code = ? AND purpose = ? AND expires_at > ?", email, code, purpose, now).
+		Where("email = ? AND purpose = ? AND expires_at > ?", email, purpose, time.Now()).
+		Order("created_at DESC").
 		First(&otp).Error
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("invalid or expired OTP")
+			return nil, errors.New("otp not found")
 		}
 		return nil, err
 	}
 	return &otp, nil
+}
+
+func (r *otpRepository) IncrementAttempts(id uint) error {
+	return r.db.Model(&entity.OTP{}).
+		Where("id = ?", id).
+		UpdateColumn("attempts", gorm.Expr("attempts + 1")).Error
 }
 
 func (r *otpRepository) DeleteByEmail(email string) error {

@@ -11,6 +11,7 @@ type OTP struct {
 	Email     string         `gorm:"column:email"`
 	Code      string         `gorm:"column:code"`
 	Purpose   string         `gorm:"column:purpose"`
+	Attempts  int			 `gorm:"column:attempts"`
 	ExpiresAt time.Time      `gorm:"column:expires_at"`
 	CreatedAt time.Time      `gorm:"column:created_at"`
 	UpdatedAt time.Time      `gorm:"column:updated_at"`
