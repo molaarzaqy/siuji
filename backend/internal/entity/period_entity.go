@@ -14,6 +14,7 @@ type Period struct {
 	Month               string         `gorm:"column:month"`
 	Year                int            `gorm:"column:year"`
 	Status              string         `gorm:"column:status"`
+	CertificatePublicID string		   `gorm:"column:certificate_public_id"`
 	CertificateURL      string         `gorm:"column:certificate_url"`
 	CertificateExpMonth time.Time      `gorm:"column:certificate_exp_month"`
 	MinPassingGrade     int            `gorm:"column:min_passing_grade"`

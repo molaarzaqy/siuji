@@ -61,21 +61,23 @@ func (c *QuestionUseCase) Create(ctx context.Context, sectionPublicID string, re
 		Number: maxNumber + 1,
 	}
 		if audioFile != nil {
-		audioURL, err := c.CloudinaryService.UploadQuestionAudio(ctx, audioFile)
+		uploaded, err := c.CloudinaryService.UploadQuestionAudio(ctx, audioFile)
 		if err != nil {
 			c.Log.Errorf("failed to upload question audio: %+v", err)
 			return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to upload audio file")
 		}
-		question.AudioURL = &audioURL
+		question.AudioURL = &uploaded.URL
+		question.AudioPublicID = &uploaded.PublicID
 	}
 
 	if imageFile != nil {
-		imageURL, err := c.CloudinaryService.UploadQuestionImage(ctx, imageFile)
+		uploaded, err := c.CloudinaryService.UploadQuestionImage(ctx, imageFile)
 		if err != nil {
 			c.Log.Errorf("failed to upload question image: %+v", err)
 			return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to upload image file")
 		}
-		question.ImageURL = &imageURL
+		question.ImageURL = &uploaded.URL
+		question.ImagePublicID = &uploaded.PublicID
 	}
 
 	if err := c.QuestionRepository.Create(question); err != nil {
@@ -105,40 +107,81 @@ func (c *QuestionUseCase) Update(ctx context.Context, publicID string, request *
 		return nil, fiber.NewError(fiber.StatusNotFound, "question not found")
 	}
 
+	var oldAudioID, oldImageID *string
+	if question.AudioPublicID != nil {
+		oldAudioID = question.AudioPublicID
+	}
+	if question.ImagePublicID != nil {
+		oldImageID = question.ImagePublicID
+	}
+	var replacedAudio, replacedImage bool
+
 	question.Question = request.Question
 	question.Passage = request.Passage
 
 	if audioFile != nil {
-		audioURL, err := c.CloudinaryService.UploadQuestionAudio(ctx, audioFile)
+		uploaded, err := c.CloudinaryService.UploadQuestionAudio(ctx, audioFile)
 		if err != nil {
 			c.Log.Errorf("failed to upload question audio: %+v", err)
 			return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to upload audio file")
 		}
-		question.AudioURL = &audioURL
+		question.AudioURL = &uploaded.URL
+		question.AudioPublicID = &uploaded.PublicID
+		replacedAudio = true
 	}
 
 	if imageFile != nil {
-		imageURL, err := c.CloudinaryService.UploadQuestionImage(ctx, imageFile)
+		uploaded, err := c.CloudinaryService.UploadQuestionImage(ctx, imageFile)
 		if err != nil {
 			c.Log.Errorf("failed to upload question image: %+v", err)
 			return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to upload image file")
 		}
-		question.ImageURL = &imageURL
+		question.ImageURL = &uploaded.URL
+		question.ImagePublicID = &uploaded.PublicID
+		replacedImage = true
 	}
 
 	if err := c.QuestionRepository.Update(question); err != nil {
 		c.Log.Errorf("failed to update question: %+v", err)
 		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to update question")
 	}
+	// Best-effort: file lama sudah tidak direferensikan siapapun
+	if replacedAudio && oldAudioID != nil {
+		if err := c.CloudinaryService.Destroy(ctx, *oldAudioID, cloudinary.ResourceTypeVideo); err != nil {
+			c.Log.Errorf("failed to destroy replaced audio %s: %+v", *oldAudioID, err)
+		}
+	}
+	if replacedImage && oldImageID != nil {
+		if err := c.CloudinaryService.Destroy(ctx, *oldImageID, cloudinary.ResourceTypeImage); err != nil {
+			c.Log.Errorf("failed to destroy replaced image %s: %+v", *oldImageID, err)
+		}
+	}
 
 	return converter.QuestionToResponse(question), nil
 }
 
 
-func (c *QuestionUseCase) Delete(publicID string) error {
-	if err := c.QuestionRepository.Delete(publicID); err != nil {
-		return fiber.NewError(fiber.StatusNotFound, "question not found")
+func (c *QuestionUseCase) Delete(ctx context.Context, publicID string) error {
+	question, err := c.QuestionRepository.FindByPublicID(publicID)
+	if err != nil {
+		return mapNotFoundError(c.Log, err, "failed to find question for deletion")
 	}
+
+	if err := c.QuestionRepository.Delete(publicID); err != nil {
+		return mapNotFoundError(c.Log, err, "failed to delete question")
+	}
+
+	if question.AudioPublicID != nil {
+		if err := c.CloudinaryService.Destroy(ctx, *question.AudioPublicID, cloudinary.ResourceTypeVideo); err != nil {
+			c.Log.Errorf("failed to destroy audio %s: %+v", *question.AudioPublicID, err)
+		}
+	}
+	if question.ImagePublicID != nil {
+		if err := c.CloudinaryService.Destroy(ctx, *question.ImagePublicID, cloudinary.ResourceTypeImage); err != nil {
+			c.Log.Errorf("failed to destroy image %s: %+v", *question.ImagePublicID, err)
+		}
+	}
+
 	return nil
 }
 

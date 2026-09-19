@@ -135,7 +135,7 @@ func (ctrl *QuestionController) Update(c fiber.Ctx) error {
 // @Failure      404 {object} response.ResponseNoData
 // @Router       /questions/{question_public_id} [delete]
 func (ctrl *QuestionController) Delete(c fiber.Ctx) error {
-	if err := ctrl.UseCase.Delete(c.Params("question_public_id")); err != nil {
+	if err := ctrl.UseCase.Delete(c, c.Params("question_public_id")); err != nil {
 		return err
 	}
 	return response.SuccessNoData(c, "Question deleted successfully.")

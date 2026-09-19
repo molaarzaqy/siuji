@@ -21,6 +21,7 @@ type PeriodUseCase struct {
 	PeriodRepository        repository.PeriodRepository
 	SectionRepository       repository.SectionRepository
 	PeriodSectionRepository repository.PeriodSectionRepository
+	ParticipantPeriodRepository repository.ParticipantPeriodRepository
 	CloudinaryService 		*cloudinary.Service
 }
 
@@ -30,6 +31,7 @@ func NewPeriodUseCase(
 	periodRepository repository.PeriodRepository,
 	sectionRepository repository.SectionRepository,
 	periodSectionRepository repository.PeriodSectionRepository,
+	participantPeriodRepository repository.ParticipantPeriodRepository,
 	cloudinaryService *cloudinary.Service,
 ) *PeriodUseCase {
 	return &PeriodUseCase{
@@ -38,19 +40,20 @@ func NewPeriodUseCase(
 		PeriodRepository:        periodRepository,
 		SectionRepository:       sectionRepository,
 		PeriodSectionRepository: periodSectionRepository,
+		ParticipantPeriodRepository: participantPeriodRepository,
 		CloudinaryService: cloudinaryService,
 	}
 }
 
-func (c *PeriodUseCase) Create(ctx context.Context, request *model.PeriodRequest, certificateTamplate io.Reader) (*model.PeriodResponse, error) {
+func (c *PeriodUseCase) Create(ctx context.Context, request *model.PeriodRequest, certificateTemplate io.Reader) (*model.PeriodResponse, error) {
 	if err := c.Validate.Struct(request); err != nil {
 		c.Log.Warnf("invalid create period request: %+v", err)
 		return nil, fiber.NewError(fiber.StatusBadRequest, "invalid request")
 	}
-	certificateURL, err := c.CloudinaryService.UploadCertificateTemplate(ctx, certificateTamplate)
+	uploaded, err := c.CloudinaryService.UploadCertificateTemplate(ctx, certificateTemplate)
 	if err != nil {
-		c.Log.Errorf("failed to upload certificate tamplate: %+v", err)
-		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to upload certificate tamplate")
+		c.Log.Errorf("failed to upload certificate template: %+v", err)
+		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to upload certificate template")
 	}
 	period := &entity.Period{
 		PublicID:            uuid.New(),
@@ -58,7 +61,8 @@ func (c *PeriodUseCase) Create(ctx context.Context, request *model.PeriodRequest
 		Month:               request.Month,
 		Year:                request.Year,
 		Status:              request.Status,
-		CertificateURL:      certificateURL,
+		CertificateURL:      uploaded.URL,
+		CertificatePublicID: uploaded.PublicID,
 		CertificateExpMonth: request.CertificateExpMonth,
 		MinPassingGrade:     request.MinPassingGrade,
 		MaxPassingGrade:     request.MaxPassingGrade,
@@ -94,7 +98,7 @@ func (c *PeriodUseCase) GetDetail(publicID string) (*model.PeriodDetailResponse,
 	return converter.PeriodToDetailResponse(period), nil
 }
 
-func (c *PeriodUseCase) Update(ctx context.Context, publicID string, request *model.PeriodRequest, certificateTamplate io.Reader) (*model.PeriodResponse, error) {
+func (c *PeriodUseCase) Update(ctx context.Context, publicID string, request *model.PeriodRequest, certificateTemplate io.Reader) (*model.PeriodResponse, error) {
 	if err := c.Validate.Struct(request); err != nil {
 		c.Log.Warnf("invalid update period request: %+v", err)
 		return nil, fiber.NewError(fiber.StatusBadRequest, "invalid request")
@@ -104,6 +108,9 @@ func (c *PeriodUseCase) Update(ctx context.Context, publicID string, request *mo
 	if err != nil {
 		return nil, fiber.NewError(fiber.StatusNotFound, "period not found")
 	}
+	// Simpan Public ID template lama terlebih dahulu untuk dihapus nanti
+	oldTemplateID := period.CertificatePublicID
+	var replacedTemplate bool
 
 	period.Title = request.Title
 	period.Month = request.Month
@@ -115,26 +122,56 @@ func (c *PeriodUseCase) Update(ctx context.Context, publicID string, request *mo
 	period.StartTime = request.StartTime
 	period.EndTime = request.EndTime
 
-	if certificateTamplate != nil {
-		certificateURL, err := c.CloudinaryService.UploadCertificateTemplate(ctx, certificateTamplate)
+	if certificateTemplate != nil {
+		uploaded, err := c.CloudinaryService.UploadCertificateTemplate(ctx, certificateTemplate)
 		if err != nil {
 			c.Log.Errorf("failed to upload certificate tamplate: %+v", err)
 			return nil,fiber.NewError(fiber.StatusInternalServerError, "failed to upload certifica tamplate")
 		}
-		period.CertificateURL = certificateURL
+		period.CertificateURL = uploaded.URL
+		period.CertificatePublicID = uploaded.PublicID
+		replacedTemplate = true
 	}
 
 	if err := c.PeriodRepository.Update(period); err != nil {
 		c.Log.Errorf("failed to update period: %+v", err)
 		return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to update period")
 	}
+	if replacedTemplate && oldTemplateID != "" {
+		if err := c.CloudinaryService.Destroy(ctx, oldTemplateID, cloudinary.ResourceTypeImage); err != nil {
+			c.Log.Errorf("failed to destroy replaced certificate template %s: %+v", oldTemplateID, err)
+		}
+	}
 
 	return converter.PeriodToResponse(period), nil
 }
 
-func (c *PeriodUseCase) Delete(publicID string) error {
+func (c *PeriodUseCase) Delete(ctx context.Context, publicID string) error {
+	period, err := c.PeriodRepository.FindByPublicID(publicID)
+	if err != nil {
+		return mapNotFoundError(c.Log, err, "failed to find period for deletion")
+	}
+	certificates, err := c.ParticipantPeriodRepository.FindCertificateIDsByPeriodID(period.ID)
+	if err != nil {
+		c.Log.Errorf("failed to collect participant certificates before delete: %+v", err)
+	}
+
 	if err := c.PeriodRepository.Delete(publicID); err != nil {
-		return fiber.NewError(fiber.StatusNotFound, "period not found")
+		return mapNotFoundError(c.Log, err, "failed to delete period")
+	}
+
+	if period.CertificatePublicID != "" {
+		if err := c.CloudinaryService.Destroy(ctx, period.CertificatePublicID, cloudinary.ResourceTypeImage); err != nil {
+			c.Log.Errorf("failed to destroy certificate template %s: %+v", period.CertificatePublicID, err)
+		}
+	}
+
+	for _, pp := range certificates {
+		if pp.CertificatePublicID != nil {
+			if err := c.CloudinaryService.Destroy(ctx, *pp.CertificatePublicID, cloudinary.ResourceTypeRaw); err != nil {
+				c.Log.Errorf("failed to destroy participant certificate %s: %+v", *pp.CertificatePublicID, err)
+			}
+		}
 	}
 	return nil
 }

@@ -20,6 +20,7 @@ type ParticipantPeriodRepository interface {
 	FindByUserID(userID uint) ([]entity.ParticipantPeriod, error)
 	FindByPeriodIDAndUserID(periodID, userID uint) (*entity.ParticipantPeriod, error)
 	FindByPeriodPublicIDAndUserID(periodPublicID string, userID uint) (*entity.ParticipantPeriod, error)
+	FindCertificateIDsByPeriodID(periodID uint) ([]entity.ParticipantPeriod, error)
 }
 
 type participantPeriodRepository struct {
@@ -184,4 +185,13 @@ func (r *participantPeriodRepository) FindByPeriodPublicIDAndUserID(periodPublic
 		return nil, err
 	}
 	return &pp, nil
+}
+
+func (r *participantPeriodRepository) FindCertificateIDsByPeriodID(periodID uint) ([]entity.ParticipantPeriod, error) {
+	var list []entity.ParticipantPeriod
+	err := r.db.
+		Select("id", "certificate_public_id").
+		Where("period_id = ? AND certificate_public_id IS NOT NULL", periodID).
+		Find(&list).Error
+	return list, err
 }

@@ -227,7 +227,7 @@ func (ctrl *PeriodController) Update(c fiber.Ctx) error {
 // @Failure      404 {object} response.ResponseNoData
 // @Router       /periods/{period_public_id} [delete]
 func (ctrl *PeriodController) Delete(c fiber.Ctx) error {
-	if err := ctrl.UseCase.Delete(c.Params("period_public_id")); err != nil {
+	if err := ctrl.UseCase.Delete(c, c.Params("period_public_id")); err != nil {
 		return err
 	}
 	return response.SuccessNoData(c, "Period deleted successfully.")

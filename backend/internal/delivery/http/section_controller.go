@@ -105,7 +105,7 @@ func (ctrl *SectionController) Update(c fiber.Ctx) error {
 // @Failure      404 {object} response.ResponseNoData
 // @Router       /sections/{section_public_id} [delete]
 func (ctrl *SectionController) Delete(c fiber.Ctx) error {
-	if err := ctrl.UseCase.Delete(c.Params("section_public_id")); err != nil {
+	if err := ctrl.UseCase.Delete(c, c.Params("section_public_id")); err != nil {
 		return err
 	}
 	return response.SuccessNoData(c, "Section deleted successfully.")

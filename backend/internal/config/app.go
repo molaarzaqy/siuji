@@ -48,8 +48,8 @@ func Bootstrap(config *BootstrapConfig) {
 
 	// setup usecases
 	authUseCase := usecase.NewAuthUseCase(config.Log, config.Validate, userRepository, otpRepository, emailService, config.JWTManager)
-	periodUseCase := usecase.NewPeriodUseCase(config.Log, config.Validate, periodRepository, sectionRepository, periodSectionRepository, config.CloudinaryService)
-	sectionUseCase := usecase.NewSectionUseCase(config.Log, config.Validate, sectionRepository)
+	periodUseCase := usecase.NewPeriodUseCase(config.Log, config.Validate, periodRepository, sectionRepository, periodSectionRepository,participantPeriodRepository, config.CloudinaryService)
+	sectionUseCase := usecase.NewSectionUseCase(config.Log, config.Validate, sectionRepository, questionRepository, config.CloudinaryService)
 	userUseCase := usecase.NewUserUseCase(config.Log, userRepository)
 	participantUseCase := usecase.NewParticipantUseCase(config.Log, config.Validate, participantPeriodRepository, userRepository, periodRepository)
 	participantExamUseCase := usecase.NewParticipantExamUseCase(

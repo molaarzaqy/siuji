@@ -69,7 +69,6 @@ func NewParticipantExamUseCase(
 	}
 }
 
-// 1. GET /api/v1/participant/periods
 func (u *ParticipantExamUseCase) GetPeriods(userID uint) ([]model.ParticipantPeriodListResponse, error) {
 	pps, err := u.ParticipantPeriodRepository.FindByUserID(userID)
 	if err != nil {
@@ -94,7 +93,6 @@ func (u *ParticipantExamUseCase) GetPeriodDetail(userID uint, periodPublicID str
 	return converter.PeriodToParticipantDetailResponse(&pp.Period, pp.Status), nil
 }
 
-// 3. POST /api/v1/participant/periods/:period_public_id/start
 func (u *ParticipantExamUseCase) StartExam(userID uint, periodPublicID string) (*model.ExamSessionResponse, error) {
 	pp, err := u.ParticipantPeriodRepository.FindByPeriodPublicIDAndUserID(periodPublicID, userID)
 	if err != nil {
@@ -159,7 +157,6 @@ func (u *ParticipantExamUseCase) StartExam(userID uint, periodPublicID string) (
 	}, nil
 }
 
-// 4. POST /api/v1/participant/periods/:period_public_id/answers
 func (u *ParticipantExamUseCase) SaveAnswer(userID uint, periodPublicID string, req *model.SaveAnswerRequest) (*model.SaveAnswerResponse, error) {
 	if err := u.Validate.Struct(req); err != nil {
 		return nil, fiber.NewError(fiber.StatusBadRequest, "invalid request body")
@@ -225,7 +222,6 @@ func (u *ParticipantExamUseCase) SaveAnswer(userID uint, periodPublicID string, 
 	}, nil
 }
 
-// 5. POST /api/v1/participant/periods/:period_public_id/submit
 func (u *ParticipantExamUseCase) SubmitExam(userID uint, periodPublicID string) (*model.SubmitExamResponse, error) {
 	pp, err := u.ParticipantPeriodRepository.FindByPeriodPublicIDAndUserID(periodPublicID, userID)
 	if err != nil {
@@ -304,7 +300,6 @@ func (u *ParticipantExamUseCase) SubmitExam(userID uint, periodPublicID string) 
 
 }
 
-// 6. GET /api/v1/participant/periods/:period_public_id/result
 func (u *ParticipantExamUseCase) GetResult(ctx context.Context, userID uint, periodPublicID string) (*model.ExamResultResponse, error) {
 	pp, err := u.ParticipantPeriodRepository.FindByPeriodPublicIDAndUserID(periodPublicID, userID)
 	if err != nil {
@@ -381,12 +376,13 @@ func (u *ParticipantExamUseCase) GetResult(ctx context.Context, userID uint, per
 		if err != nil {
 			u.Log.Errorf("failed to generate certificate pdf: %v", err)
 		} else {
-			uploadedURL, err := u.CloudinaryService.UploadGeneratedCertificate(ctx, bytes.NewReader(pdfBytes))
+			uploaded, err := u.CloudinaryService.UploadGeneratedCertificate(ctx, bytes.NewReader(pdfBytes))
 			if err != nil {
 				u.Log.Errorf("failed to upload generated certificate to cloudinary: %v", err)
 			} else {
-				certificateURL = &uploadedURL
-				pp.CertificateURL = &uploadedURL
+				certificateURL = &uploaded.URL
+				pp.CertificateURL = &uploaded.URL
+				pp.CertificatePublicID = &uploaded.PublicID
 				if err := u.ParticipantPeriodRepository.Update(pp); err != nil {
 					u.Log.Errorf("failed to save certificate url to participant_period: %v", err)
 				}

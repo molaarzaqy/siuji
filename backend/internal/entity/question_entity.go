@@ -13,6 +13,8 @@ type Question struct {
 	Question  string    `gorm:"column:question"`
 	AudioURL  *string   `gorm:"column:audio_url"`
 	ImageURL  *string   `gorm:"column:image_url"`
+	AudioPublicID *string `gorm:"column:audio_public_id"`
+	ImagePublicID *string `gorm:"column:image_public_id"`
 	Passage   *string   `gorm:"column:passage"`
 	Number    int       `gorm:"column:number"`
 	CreatedAt time.Time `gorm:"column:created_at"`

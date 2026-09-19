@@ -14,6 +14,7 @@ type ParticipantPeriod struct {
 	Status         string    `gorm:"column:status"`
 	Score          *int      `gorm:"column:score"`
 	CertificateURL *string   `gorm:"column:certificate_url"`
+	CertificatePublicID *string `gorm:"column:certificate_public_id"`
 	CreatedAt      time.Time `gorm:"column:created_at"`
 	UpdatedAt      time.Time `gorm:"column:updated_at"`
 

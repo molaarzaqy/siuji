@@ -17,6 +17,7 @@ type QuestionRepository interface {
 	Update(question *entity.Question) error
 	Delete(publicID string) error
 	UpdateNumbersByPublicIDs(publicIDs []string) error
+	FindCloudinaryIDsBySectionID(sectionID uint) ([]entity.Question, error)
 }
 
 type questionRepository struct {
@@ -124,4 +125,12 @@ func (r *questionRepository) UpdateNumbersByPublicIDs(publicIDs []string) error 
 		}
 		return nil
 	})
+}
+
+func (r *questionRepository) FindCloudinaryIDsBySectionID(sectionID uint) ([]entity.Question, error) {
+	var questions []entity.Question
+	err := r.db.Select("id", "audio_public_id", "image_public_id").
+		Where("section_id = ?", sectionID).
+		Find(&questions).Error
+	return questions, err
 }
