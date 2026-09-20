@@ -787,6 +787,31 @@ const docTemplate = `{
                 }
             }
         },
+        "/participants/template": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Excel template with the required columns for bulk participant import. Admin only.",
+                "produces": [
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                ],
+                "tags": [
+                    "Participant"
+                ],
+                "summary": "Download participant import template",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "file"
+                        }
+                    }
+                }
+            }
+        },
         "/periods": {
             "get": {
                 "security": [

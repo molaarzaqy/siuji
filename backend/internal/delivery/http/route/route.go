@@ -76,6 +76,13 @@ func (r *RouteConfig) setupPeriodRoutes() {
 	periods.Get("/:period_public_id/participants/:user_public_id", r.ParticipantController.GetDetail)
 	periods.Put("/:period_public_id/participants/:user_public_id", r.ParticipantController.Update)
 	periods.Delete("/:period_public_id/participants/:user_public_id", r.ParticipantController.Remove)
+	
+	// numpang  
+	r.App.Get("/api/v1/participants/template",
+		middleware.JWTAuth(r.JWTManager, r.Log),
+		middleware.RequireRole("admin"),
+		r.ParticipantController.DownloadTemplate,
+	)	
 }
 
 func (r *RouteConfig) setupSectionRoutes() {

@@ -5,6 +5,7 @@ import (
 
 	"siuji-backend/internal/model"
 	"siuji-backend/internal/usecase"
+	"siuji-backend/pkg/exceltemplate"
 	"siuji-backend/pkg/response"
 
 	"github.com/gofiber/fiber/v3"
@@ -175,4 +176,23 @@ func (ctrl *ParticipantController) Import(c fiber.Ctx) error {
 		return err
 	}
 	return response.Success(c, "Participants imported successfully.", result)
+}
+
+// DownloadTemplate godoc
+// @Summary      Download participant import template
+// @Description  Excel template with the required columns for bulk participant import. Admin only.
+// @Tags         Participant
+// @Produce      application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+// @Security     BearerAuth
+// @Success      200 {file} file
+// @Router       /participants/template [get]
+func (ctrl *ParticipantController) DownloadTemplate(c fiber.Ctx) error {
+	data, err := exceltemplate.GenerateParticipantTemplate()
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "failed to generate template")
+	}
+
+	c.Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+	c.Set("Content-Disposition", `attachment; filename="template_peserta.xlsx"`)
+	return c.Send(data)
 }
