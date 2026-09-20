@@ -17,6 +17,7 @@ import SoftBadge from "components/SoftBadge";
 import SoftBox from "components/SoftBox";
 import SoftButton from "components/SoftButton";
 import SoftInput from "components/SoftInput";
+import SoftSelect from "components/SoftSelect";
 import SoftTypography from "components/SoftTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
@@ -400,23 +401,18 @@ function PeriodDetail() {
 
           {/* Add section */}
           <SoftBox p={3} display="flex" gap={2} alignItems="center" flexWrap="wrap">
-            <TextField
-              select
-              label="Pilih section"
-              value={selected}
-              onChange={(event) => setSelected(event.target.value)}
-              sx={{ minWidth: 280 }}
-            >
-              {availableToAdd.length > 0 ? (
-                availableToAdd.map((section) => (
-                  <MenuItem key={section.public_id} value={section.public_id}>
-                    {section.title} — {section.section_type}
-                  </MenuItem>
-                ))
-              ) : (
-                <MenuItem disabled>Semua section sudah ditambahkan</MenuItem>
-              )}
-            </TextField>
+            <SoftBox minWidth={280}>
+              <SoftBox mb={1} ml={0.5} lineHeight={0} display="inline-block">
+                <SoftTypography component="label" variant="caption" fontWeight="bold">Pilih section</SoftTypography>
+              </SoftBox>
+              <SoftSelect
+                placeholder="Pilih section..."
+                options={availableToAdd.map(s => ({value: s.public_id, label: `${s.title} — ${s.section_type}`}))}
+                value={selected ? {value: selected, label: availableToAdd.find(s => s.public_id === selected)?.title + " — " + availableToAdd.find(s => s.public_id === selected)?.section_type} : null}
+                onChange={(option) => setSelected(option ? option.value : "")}
+                isDisabled={availableToAdd.length === 0}
+              />
+            </SoftBox>
             <SoftButton variant="gradient" color="info" onClick={addSection} disabled={!selected}>
               <Icon sx={{ mr: 1 }}>add</Icon>Tambahkan section
             </SoftButton>
@@ -444,20 +440,34 @@ function PeriodDetail() {
                 <SoftInput type="number" value={editForm.year || ""} onChange={updateEditField("year")} required />
               </Grid>
               <Grid item xs={12} md={4}>
-                <SoftTypography component="label" variant="caption" fontWeight="bold">Status</SoftTypography>
-                <TextField select fullWidth value={editForm.status || "draft"} onChange={updateEditField("status")} sx={{ mt: 0.5 }}>
-                  <MenuItem value="draft">Draft</MenuItem>
-                  <MenuItem value="published">Published</MenuItem>
-                  <MenuItem value="closed">Closed</MenuItem>
-                </TextField>
+                <SoftBox mb={1} ml={0.5} lineHeight={0} display="inline-block">
+                  <SoftTypography component="label" variant="caption" fontWeight="bold">Status</SoftTypography>
+                </SoftBox>
+                <SoftSelect
+                  placeholder="Pilih status..."
+                  options={[
+                    { value: "draft", label: "Draft" },
+                    { value: "published", label: "Published" },
+                    { value: "closed", label: "Closed" },
+                  ]}
+                  value={{
+                    value: editForm.status || "draft",
+                    label: (editForm.status || "draft").charAt(0).toUpperCase() + (editForm.status || "draft").slice(1)
+                  }}
+                  onChange={(option) => updateEditField("status")({ target: { value: option ? option.value : "" } })}
+                />
               </Grid>
               <Grid item xs={12} md={4}>
-                <SoftTypography component="label" variant="caption" fontWeight="bold">Mulai</SoftTypography>
-                <TextField fullWidth type="datetime-local" value={editForm.start_time || ""} onChange={updateEditField("start_time")} InputLabelProps={{ shrink: true }} sx={{ mt: 0.5 }} required />
+                <SoftBox mb={1} ml={0.5} lineHeight={0} display="inline-block">
+                  <SoftTypography component="label" variant="caption" fontWeight="bold">Mulai</SoftTypography>
+                </SoftBox>
+                <SoftInput type="datetime-local" value={editForm.start_time || ""} onChange={updateEditField("start_time")} required />
               </Grid>
               <Grid item xs={12} md={4}>
-                <SoftTypography component="label" variant="caption" fontWeight="bold">Selesai</SoftTypography>
-                <TextField fullWidth type="datetime-local" value={editForm.end_time || ""} onChange={updateEditField("end_time")} InputLabelProps={{ shrink: true }} sx={{ mt: 0.5 }} required />
+                <SoftBox mb={1} ml={0.5} lineHeight={0} display="inline-block">
+                  <SoftTypography component="label" variant="caption" fontWeight="bold">Selesai</SoftTypography>
+                </SoftBox>
+                <SoftInput type="datetime-local" value={editForm.end_time || ""} onChange={updateEditField("end_time")} required />
               </Grid>
               <Grid item xs={12} md={6}>
                 <SoftTypography component="label" variant="caption" fontWeight="bold">Nilai minimum lulus</SoftTypography>
@@ -468,10 +478,12 @@ function PeriodDetail() {
                 <SoftInput type="number" value={editForm.max_passing_grade ?? 0} onChange={updateEditField("max_passing_grade")} />
               </Grid>
               <Grid item xs={12}>
-                <SoftTypography component="label" variant="caption" fontWeight="bold">
-                  Template sertifikat (opsional, kosongkan jika tidak ingin mengubah)
-                </SoftTypography>
-                <TextField fullWidth type="file" onChange={updateEditField("certificate_template")} InputLabelProps={{ shrink: true }} sx={{ mt: 0.5 }} />
+                <SoftBox mb={1} ml={0.5} lineHeight={0} display="inline-block">
+                  <SoftTypography component="label" variant="caption" fontWeight="bold">
+                    Template sertifikat (opsional, kosongkan jika tidak ingin mengubah)
+                  </SoftTypography>
+                </SoftBox>
+                <SoftInput type="file" onChange={updateEditField("certificate_template")} />
               </Grid>
             </Grid>
           </DialogContent>

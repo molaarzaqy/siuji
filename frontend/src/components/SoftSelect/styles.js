@@ -80,7 +80,7 @@ export default (selectSize, selectError, selectSuccess) => {
       display: "flex",
       alignItems: "center",
       width: "100%",
-      height: selectSizeValue,
+      minHeight: selectSizeValue,
       padding: 0,
       fontSize: selectSize === "small" ? size.xs : size.sm,
       fontWeight: fontWeightRegular,
@@ -95,36 +95,26 @@ export default (selectSize, selectError, selectSuccess) => {
       boxShadow: state.isFocused ? boxShadowValue : "none",
     }),
 
-    valueContainer: () => ({
-      display: "flex",
-      alignItems: "center",
-      width: "100%",
-      height: "max-content",
+    valueContainer: (provided) => ({
+      ...provided,
       padding: `0 ${pxToRem(12)}`,
       color: dark.main,
     }),
 
-    placeholder: () => ({
-      position: "absolute",
-      top: selectSize === "small" ? "52%" : "51%",
-      transform: "translateY(-50%)",
-      marginLeft: 0,
-      marginRight: 0,
+    placeholder: (provided) => ({
+      ...provided,
       color: dark.main,
       opacity: 0.5,
     }),
 
-    singleValue: () => ({
-      position: "absolute",
-      top: selectSize === "small" ? "52%" : "51%",
-      transform: "translateY(-50%)",
+    singleValue: (provided) => ({
+      ...provided,
       color: text.main,
     }),
 
-    input: () => ({
+    input: (provided) => ({
+      ...provided,
       color: dark.main,
-      position: "relative",
-      margin: 0,
     }),
 
     indicatorSeparator: () => ({
@@ -150,6 +140,7 @@ export default (selectSize, selectError, selectSuccess) => {
       ...provided,
       minWidth: pxToRem(160),
       boxShadow: lg,
+      zIndex: 9999,
       padding: `${pxToRem(16)} ${pxToRem(8)}`,
       fontSize: size.sm,
       color: text.main,
@@ -165,41 +156,30 @@ export default (selectSize, selectError, selectSuccess) => {
       padding: 0,
     }),
 
+    menuPortal: (provided) => ({
+      ...provided,
+      zIndex: 9999,
+    }),
+
     option: (provided, state) => ({
       ...provided,
       position: "relative",
       minWidth: pxToRem(160),
       minHeight: "unset",
-      padding: `${pxToRem(4.8)} ${pxToRem(100)} ${pxToRem(4.8)} ${pxToRem(16)}`,
+      padding: `${pxToRem(9.6)} ${pxToRem(16)}`,
       borderRadius: borderRadius.md,
       fontSize: size.sm,
-      color: text.main,
+      color: state.isSelected ? dark.main : text.main,
+      fontWeight: state.isSelected ? 600 : fontWeightRegular,
+      backgroundColor: state.isSelected ? light.main : transparent.main,
       cursor: state.isDisabled ? "not-allowed" : "pointer",
       opacity: state.isDisabled ? 0.5 : 1,
       userSelect: state.isDisabled ? "none" : "auto",
       transition: "background-color 300ms ease, color 300ms ease",
 
-      "&:after": {
-        content: "'Press to select'",
-        display: "block",
-        fontSize: size.xs,
-        position: "absolute",
-        right: pxToRem(10),
-        top: "52%",
-        color: text.main,
-        opacity: 0,
-        transform: "translateY(-50%)",
-        transition: "opacity 300ms ease",
-      },
-
       "&:hover, &:focus": {
         backgroundColor: state.isDisabled ? transparent.main : light.main,
         color: state.isDisabled ? "currentColor" : dark.main,
-
-        "&:after": {
-          content: state.isDisabled && "''",
-          opacity: 0.5,
-        },
       },
     }),
 

@@ -18,6 +18,7 @@ import Tooltip from "@mui/material/Tooltip";
 import SoftBox from "components/SoftBox";
 import SoftButton from "components/SoftButton";
 import SoftInput from "components/SoftInput";
+import SoftSelect from "components/SoftSelect";
 import SoftTypography from "components/SoftTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
@@ -247,17 +248,15 @@ function ScoreConversions() {
           <SoftBox p={3}>
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={12} md={4}>
-                <TextField
-                  select
-                  fullWidth
-                  label="Section"
-                  value={type}
-                  onChange={(event) => setType(event.target.value)}
-                >
-                  {Object.entries(sectionLabels).map(([value, label]) => (
-                    <MenuItem key={value} value={value}>{label}</MenuItem>
-                  ))}
-                </TextField>
+                <SoftBox mb={1} ml={0.5} lineHeight={0} display="inline-block">
+                  <SoftTypography component="label" variant="caption" fontWeight="bold">Section</SoftTypography>
+                </SoftBox>
+                <SoftSelect
+                  placeholder="Pilih section..."
+                  options={Object.entries(sectionLabels).map(([value, label]) => ({value, label}))}
+                  value={{value: type, label: sectionLabels[type]}}
+                  onChange={(option) => setType(option ? option.value : "")}
+                />
               </Grid>
               <Grid item xs={12} md={8} display="flex" justifyContent={{ xs: "flex-start", md: "flex-end" }} gap={1} flexWrap="wrap">
                 <SoftButton variant="gradient" color="info" onClick={addRow} disabled={saving}>

@@ -27,14 +27,27 @@ import colors from "assets/theme/base/colors";
 // Custom styles for SoftSelect
 import styles from "components/SoftSelect/styles";
 
-const SoftSelect = forwardRef(({ size = "medium", error = false, success = false, ...rest }, ref) => {
+const SoftSelect = forwardRef(({
+  size = "medium",
+  error = false,
+  success = false,
+  isClearable = true,
+  noOptionsMessage = () => "Tidak ada pilihan",
+  loadingMessage = () => "Memuat pilihan...",
+  ...rest
+}, ref) => {
   const { light } = colors;
 
   return (
     <Select
       {...rest}
       ref={ref}
+      isClearable={isClearable}
+      noOptionsMessage={noOptionsMessage}
+      loadingMessage={loadingMessage}
       styles={styles(size, error, success)}
+      menuPortalTarget={typeof document !== "undefined" ? document.body : null}
+      menuPosition="fixed"
       theme={(theme) => ({
         ...theme,
         colors: {
@@ -52,6 +65,9 @@ SoftSelect.propTypes = {
   size: PropTypes.oneOf(["small", "medium", "large"]),
   error: PropTypes.bool,
   success: PropTypes.bool,
+  isClearable: PropTypes.bool,
+  noOptionsMessage: PropTypes.func,
+  loadingMessage: PropTypes.func,
 };
 
 export default SoftSelect;

@@ -26,6 +26,7 @@ import SoftBox from "components/SoftBox";
 import SoftButton from "components/SoftButton";
 import SoftInput from "components/SoftInput";
 import SoftPagination from "components/SoftPagination";
+import SoftSelect from "components/SoftSelect";
 import SoftTypography from "components/SoftTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
@@ -283,12 +284,44 @@ function Periods() {
             <Grid item xs={12}><SoftInput placeholder="Judul periode" value={form.title} onChange={updateField("title")} required /></Grid>
             <Grid item xs={12} md={6}><SoftInput placeholder="Bulan, contoh: September" value={form.month} onChange={updateField("month")} required /></Grid>
             <Grid item xs={12} md={6}><SoftInput type="number" placeholder="Tahun" value={form.year} onChange={updateField("year")} required /></Grid>
-            <Grid item xs={12} md={4}><TextField select fullWidth label="Status" value={form.status} onChange={updateField("status")}><MenuItem value="draft">Draft</MenuItem><MenuItem value="published">Published</MenuItem><MenuItem value="closed">Closed</MenuItem></TextField></Grid>
-            <Grid item xs={12} md={4}><TextField fullWidth label="Mulai" type="datetime-local" value={form.start_time} onChange={updateField("start_time")} InputLabelProps={{ shrink: true }} required /></Grid>
-            <Grid item xs={12} md={4}><TextField fullWidth label="Selesai" type="datetime-local" value={form.end_time} onChange={updateField("end_time")} InputLabelProps={{ shrink: true }} required /></Grid>
+            <Grid item xs={12} md={4}>
+              <SoftBox mb={1} ml={0.5} lineHeight={0} display="inline-block">
+                <SoftTypography component="label" variant="caption" fontWeight="bold">Status</SoftTypography>
+              </SoftBox>
+              <SoftSelect
+                placeholder="Pilih status..."
+                options={[
+                  { value: "draft", label: "Draft" },
+                  { value: "published", label: "Published" },
+                  { value: "closed", label: "Closed" },
+                ]}
+                value={{
+                  value: form.status,
+                  label: form.status ? form.status.charAt(0).toUpperCase() + form.status.slice(1) : ""
+                }}
+                onChange={(option) => updateField("status")({ target: { value: option ? option.value : "" } })}
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <SoftBox mb={1} ml={0.5} lineHeight={0} display="inline-block">
+                <SoftTypography component="label" variant="caption" fontWeight="bold">Mulai *</SoftTypography>
+              </SoftBox>
+              <SoftInput type="datetime-local" value={form.start_time} onChange={updateField("start_time")} required />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <SoftBox mb={1} ml={0.5} lineHeight={0} display="inline-block">
+                <SoftTypography component="label" variant="caption" fontWeight="bold">Selesai *</SoftTypography>
+              </SoftBox>
+              <SoftInput type="datetime-local" value={form.end_time} onChange={updateField("end_time")} required />
+            </Grid>
             <Grid item xs={12} md={6}><SoftInput type="number" placeholder="Nilai minimum lulus" value={form.min_passing_grade} onChange={updateField("min_passing_grade")} /></Grid>
             <Grid item xs={12} md={6}><SoftInput type="number" placeholder="Nilai maksimum" value={form.max_passing_grade} onChange={updateField("max_passing_grade")} /></Grid>
-            <Grid item xs={12}><TextField fullWidth type="file" label="Template sertifikat" onChange={updateField("certificate_template")} InputLabelProps={{ shrink: true }} required /></Grid>
+            <Grid item xs={12}>
+              <SoftBox mb={1} ml={0.5} lineHeight={0} display="inline-block">
+                <SoftTypography component="label" variant="caption" fontWeight="bold">Template sertifikat *</SoftTypography>
+              </SoftBox>
+              <SoftInput type="file" onChange={updateField("certificate_template")} required />
+            </Grid>
           </Grid></DialogContent>
           <DialogActions sx={{ px: 3, pb: 3 }}><SoftButton color="light" onClick={() => setDialogOpen(false)} disabled={saving}>Batal</SoftButton><SoftButton type="submit" variant="gradient" color="info" disabled={saving}>{saving ? "Menyimpan..." : "Simpan periode"}</SoftButton></DialogActions>
         </SoftBox>

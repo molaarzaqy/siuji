@@ -1,4 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import PropTypes from "prop-types";
+import { DndContext, PointerSensor, closestCenter, useSensor, useSensors } from "@dnd-kit/core";
+import { SortableContext, arrayMove, horizontalListSortingStrategy, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import Card from "@mui/material/Card";
 import Chip from "@mui/material/Chip";
 import Dialog from "@mui/material/Dialog";
@@ -24,6 +28,7 @@ import SoftBox from "components/SoftBox";
 import SoftButton from "components/SoftButton";
 import SoftInput from "components/SoftInput";
 import SoftPagination from "components/SoftPagination";
+import SoftSelect from "components/SoftSelect";
 import SoftTypography from "components/SoftTypography";
 import MDEditor from "components/SoftEditor";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
@@ -65,6 +70,36 @@ const typeMeta = {
   reading: { label: "Reading", color: "success" },
 };
 
+function SortableItem({ id, children }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  return (
+    <SoftBox
+      ref={setNodeRef}
+      sx={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.55 : 1,
+        zIndex: isDragging ? 1 : "auto",
+      }}
+    >
+      {children({ attributes, listeners })}
+    </SoftBox>
+  );
+}
+
+SortableItem.propTypes = {
+  id: PropTypes.string.isRequired,
+  children: PropTypes.func.isRequired,
+};
+
 function Sections() {
   const [sections, setSections] = useState([]);
   const [search, setSearch] = useState("");
@@ -90,6 +125,7 @@ function Sections() {
   const [editingOptionId, setEditingOptionId] = useState(null);
   const [editOptionText, setEditOptionText] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
   // ── Data loading ────────────────────────────────────────
   const load = useCallback(async () => {
@@ -211,9 +247,7 @@ function Sections() {
   };
 
   const reorderQuestion = async (questions, from, to) => {
-    const next = [...questions];
-    const [item] = next.splice(from, 1);
-    next.splice(to, 0, item);
+    const next = arrayMove(questions, from, to);
     setDetail((prev) => ({ ...prev, questions: next }));
     try {
       await apiRequest(`/sections/${detail.public_id}/questions/reorder`, {
@@ -279,9 +313,7 @@ function Sections() {
   };
 
   const reorderOptions = async (question, from, to) => {
-    const next = [...(question.options || [])];
-    const [item] = next.splice(from, 1);
-    next.splice(to, 0, item);
+    const next = arrayMove(question.options || [], from, to);
     // Optimistic update
     setDetail((prev) => ({
       ...prev,
@@ -298,6 +330,22 @@ function Sections() {
       setError(requestError.message);
       await refreshDetail();
     }
+  };
+
+  const handleQuestionDragEnd = ({ active, over }) => {
+    if (!over || active.id === over.id) return;
+    const questions = detail?.questions || [];
+    const from = questions.findIndex((question) => question.public_id === active.id);
+    const to = questions.findIndex((question) => question.public_id === over.id);
+    if (from !== -1 && to !== -1) reorderQuestion(questions, from, to);
+  };
+
+  const handleOptionDragEnd = (question) => ({ active, over }) => {
+    if (!over || active.id === over.id) return;
+    const options = question.options || [];
+    const from = options.findIndex((option) => option.public_id === active.id);
+    const to = options.findIndex((option) => option.public_id === over.id);
+    if (from !== -1 && to !== -1) reorderOptions(question, from, to);
   };
 
   return (
@@ -465,12 +513,20 @@ function Sections() {
           <DialogContent dividers>
             <SoftTypography component="label" variant="caption" fontWeight="bold">Judul section</SoftTypography>
             <SoftInput sx={{ mt: 1 }} value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} required />
-            <SoftTypography component="label" variant="caption" fontWeight="bold" display="block" mt={2}>Tipe section</SoftTypography>
-            <TextField select fullWidth sx={{ mt: 1 }} value={form.section_type} onChange={(event) => setForm({ ...form, section_type: event.target.value })}>
-              {Object.entries(typeMeta).map(([value, meta]) => (
-                <MenuItem key={value} value={value}>{meta.label}</MenuItem>
-              ))}
-            </TextField>
+            <SoftBox mb={1} mt={2} lineHeight={0} display="inline-block">
+              <SoftTypography component="label" variant="caption" fontWeight="bold">
+                Tipe section
+              </SoftTypography>
+            </SoftBox>
+            <SoftSelect
+              placeholder="Pilih tipe section..."
+              options={Object.entries(typeMeta).map(([value, meta]) => ({ value, label: meta.label }))}
+              value={{ value: form.section_type, label: typeMeta[form.section_type]?.label || "" }}
+              onChange={(option) => setForm({ ...form, section_type: option ? option.value : "" })}
+            />
+            <SoftTypography variant="caption" color="text" display="block" mt={1}>
+              Pilih kategori materi yang akan dikelola.
+            </SoftTypography>
           </DialogContent>
           <DialogActions>
             <SoftButton color="secondary" onClick={() => setDialogOpen(false)}>Batal</SoftButton>
@@ -500,27 +556,28 @@ function Sections() {
           </SoftBox>
         </DialogTitle>
         <DialogContent dividers>
-          {(detail?.questions || []).map((question, index) => (
-            <SoftBox key={question.public_id} py={2} borderBottom="1px solid" borderColor="grey.200">
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleQuestionDragEnd}>
+            <SortableContext items={(detail?.questions || []).map((question) => question.public_id)} strategy={verticalListSortingStrategy}>
+              {(detail?.questions || []).map((question, index) => (
+                <SortableItem key={question.public_id} id={question.public_id}>
+                  {({ attributes, listeners }) => (
+                    <SoftBox py={2} borderBottom="1px solid" borderColor="grey.200">
               <SoftBox display="flex" justifyContent="space-between" gap={2} alignItems="flex-start">
-                <SoftTypography variant="button" fontWeight="bold">
-                  {index + 1}. {question.question}
-                </SoftTypography>
+                <SoftBox display="flex" alignItems="flex-start" gap={1}>
+                  <IconButton
+                    size="small"
+                    {...attributes}
+                    {...listeners}
+                    aria-label="Geser soal"
+                    sx={{ cursor: "grab", touchAction: "none" }}
+                  >
+                    <Icon fontSize="small">open_with</Icon>
+                  </IconButton>
+                  <SoftTypography variant="button" fontWeight="bold">
+                    {index + 1}. {question.question}
+                  </SoftTypography>
+                </SoftBox>
                 <SoftBox display="flex" gap={0.5} flexShrink={0}>
-                  <Tooltip title="Pindah ke atas">
-                    <span>
-                      <IconButton size="small" disabled={index === 0} onClick={() => reorderQuestion(detail.questions, index, index - 1)}>
-                        <Icon fontSize="small">arrow_upward</Icon>
-                      </IconButton>
-                    </span>
-                  </Tooltip>
-                  <Tooltip title="Pindah ke bawah">
-                    <span>
-                      <IconButton size="small" disabled={index === (detail?.questions?.length || 0) - 1} onClick={() => reorderQuestion(detail.questions, index, index + 1)}>
-                        <Icon fontSize="small">arrow_downward</Icon>
-                      </IconButton>
-                    </span>
-                  </Tooltip>
                   <Tooltip title="Edit soal">
                     <IconButton size="small" color="warning" onClick={() => { setTargetSection(detail); setEditingQuestion(question); setQuestionForm({ question: question.question, passage: question.passage || "", audio: null, image: null }); setQuestionOpen(true); }}>
                       <Icon fontSize="small">edit</Icon>
@@ -541,19 +598,31 @@ function Sections() {
               )}
 
               {/* Options */}
-              <SoftBox mt={2} display="flex" gap={1} flexWrap="wrap">
-                {(question.options || []).map((option, optIndex) => (
-                  <SoftBox
-                    key={option.public_id}
-                    display="flex"
-                    alignItems="center"
-                    gap={0.5}
-                    px={1.5}
-                    py={0.75}
-                    borderRadius="md"
-                    bgColor={question.correct_option_public_id === option.public_id ? "success" : "grey.100"}
-                    sx={{ transition: "all 0.2s" }}
-                  >
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleOptionDragEnd(question)}>
+                <SortableContext items={(question.options || []).map((option) => option.public_id)} strategy={horizontalListSortingStrategy}>
+                  <SoftBox mt={2} display="flex" gap={1} flexWrap="wrap">
+                    {(question.options || []).map((option) => (
+                      <SortableItem key={option.public_id} id={option.public_id}>
+                        {({ attributes: optionAttributes, listeners: optionListeners }) => (
+                          <SoftBox
+                            display="flex"
+                            alignItems="center"
+                            gap={0.5}
+                            px={1.5}
+                            py={0.75}
+                            borderRadius="md"
+                            bgColor={question.correct_option_public_id === option.public_id ? "success" : "grey.100"}
+                            sx={{ transition: "all 0.2s" }}
+                          >
+                            <IconButton
+                              size="small"
+                              {...optionAttributes}
+                              {...optionListeners}
+                              aria-label="Geser opsi jawaban"
+                              sx={{ cursor: "grab", touchAction: "none" }}
+                            >
+                              <Icon sx={{ fontSize: 16 }}>open_with</Icon>
+                            </IconButton>
                     {editingOptionId === option.public_id ? (
                       <SoftBox display="flex" alignItems="center" gap={1}>
                         <SoftTypography variant="button" color="text" fontWeight="bold">
@@ -586,12 +655,6 @@ function Sections() {
                           {option.label}: {option.option_text}
                         </SoftButton>
                         <SoftBox display="flex" gap={0}>
-                          <IconButton size="small" disabled={optIndex === 0} onClick={() => reorderOptions(question, optIndex, optIndex - 1)}>
-                            <Icon sx={{ fontSize: 14 }}>arrow_back</Icon>
-                          </IconButton>
-                          <IconButton size="small" disabled={optIndex === (question.options || []).length - 1} onClick={() => reorderOptions(question, optIndex, optIndex + 1)}>
-                            <Icon sx={{ fontSize: 14 }}>arrow_forward</Icon>
-                          </IconButton>
                           <IconButton size="small" onClick={() => { setEditingOptionId(option.public_id); setEditOptionText(option.option_text); }}>
                             <Icon sx={{ fontSize: 14 }}>edit</Icon>
                           </IconButton>
@@ -601,9 +664,13 @@ function Sections() {
                         </SoftBox>
                       </>
                     )}
+                          </SoftBox>
+                        )}
+                      </SortableItem>
+                    ))}
                   </SoftBox>
-                ))}
-              </SoftBox>
+                </SortableContext>
+              </DndContext>
 
               {/* Add option inline */}
               <SoftBox mt={1} display="flex" gap={1} alignItems="center">
@@ -617,8 +684,12 @@ function Sections() {
                   Tambah opsi
                 </SoftButton>
               </SoftBox>
-            </SoftBox>
-          ))}
+                    </SoftBox>
+                  )}
+                </SortableItem>
+              ))}
+            </SortableContext>
+          </DndContext>
 
           {!detail?.questions?.length && (
             <SoftBox py={6} textAlign="center">

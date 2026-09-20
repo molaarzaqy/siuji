@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Alert from "@mui/material/Alert";
+import IconButton from "@mui/material/IconButton";
 import Switch from "@mui/material/Switch";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import SoftBox from "components/SoftBox";
 import SoftTypography from "components/SoftTypography";
 import SoftInput from "components/SoftInput";
@@ -14,6 +17,7 @@ function SignInForm() {
   const { signIn, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState("");
 
@@ -39,7 +43,27 @@ function SignInForm() {
       </SoftBox>
       <SoftBox mb={2}>
         <SoftTypography component="label" variant="caption" fontWeight="bold" display="block" mb={1}>Password</SoftTypography>
-        <SoftInput type="password" placeholder="Password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" required />
+        <SoftInput
+          type={showPassword ? "text" : "password"}
+          placeholder="Password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          autoComplete="current-password"
+          required
+          icon={{
+            direction: "right",
+            component: (
+              <IconButton
+                type="button"
+                aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
+                onClick={() => setShowPassword((value) => !value)}
+                size="small"
+              >
+                {showPassword ? <VisibilityOff /> : <Visibility />}
+              </IconButton>
+            ),
+          }}
+        />
       </SoftBox>
       <SoftBox display="flex" alignItems="center">
         <Switch checked={rememberMe} onChange={() => setRememberMe((value) => !value)} />
