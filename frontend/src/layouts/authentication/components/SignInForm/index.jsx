@@ -43,27 +43,7 @@ function SignInForm() {
       </SoftBox>
       <SoftBox mb={2}>
         <SoftTypography component="label" variant="caption" fontWeight="bold" display="block" mb={1}>Password</SoftTypography>
-        <SoftInput
-          type={showPassword ? "text" : "password"}
-          placeholder="Password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          autoComplete="current-password"
-          required
-          icon={{
-            direction: "right",
-            component: (
-              <IconButton
-                type="button"
-                aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
-                onClick={() => setShowPassword((value) => !value)}
-                size="small"
-              >
-                {showPassword ? <VisibilityOff /> : <Visibility />}
-              </IconButton>
-            ),
-          }}
-        />
+        <SoftInput type="password" placeholder="Password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" required />
       </SoftBox>
       <SoftBox display="flex" alignItems="center">
         <Switch checked={rememberMe} onChange={() => setRememberMe((value) => !value)} />

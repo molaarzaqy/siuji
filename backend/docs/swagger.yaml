@@ -1089,6 +1089,22 @@ paths:
       summary: Submit exam
       tags:
       - ParticipantExam
+  /participants/template:
+    get:
+      description: Excel template with the required columns for bulk participant import.
+        Admin only.
+      produces:
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+      security:
+      - BearerAuth: []
+      summary: Download participant import template
+      tags:
+      - Participant
   /periods:
     get:
       description: Get a paginated list of exam periods.
