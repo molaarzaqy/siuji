@@ -18,7 +18,7 @@ func NewQuestionController(useCase *usecase.QuestionUseCase) *QuestionController
 	}
 }
 
-var audioTypes = []string{"audio/mpeg", "audio/mp3", "audio/wav", "audio/x-wav"}
+var audioTypes = []string{"audio/mpeg", "audio/mp3", "audio/wav", "audio/x-wav", "audio/wave"}
 var imageTypes = []string{"image/jpeg", "image/png"}
 
 

@@ -4,9 +4,15 @@
 
 # Docker volumes / data lokal
 postgres_data/
+.docker-config/
 
 # OS & Editor Files
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+
+BACKEND_FRONTEND_FEATURES.md
+FRONTEND_SOURCE_GUIDE.md
+IMPLEMENTATION_PLAN.md
+PRD.md
