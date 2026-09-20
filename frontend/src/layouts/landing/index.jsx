@@ -1,277 +1,60 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import Container from "@mui/material/Container";
-import Grid from "@mui/material/Grid";
-import Icon from "@mui/material/Icon";
-import Card from "@mui/material/Card";
-
-import SoftBox from "components/SoftBox";
-import SoftTypography from "components/SoftTypography";
-import SoftButton from "components/SoftButton";
+import PropTypes from "prop-types";
 import PageLayout from "examples/LayoutContainers/PageLayout";
+import { AccessTime, ArrowForward, Bolt, Check, KeyboardArrowDown, Close, Devices, Email, Headphones, Instagram, LinkedIn, LocationOn, Menu, School, Security, Star, Twitter, Verified } from "@mui/icons-material";
+import "./landing.css";
+
+const loginPath = "/authentication/sign-in/basic";
+const features = [
+  { icon: <Security />, color: "blue", title: "Keamanan Anti Curang", text: "Sistem ujian terkunci, token sesi, dan pengawasan yang membantu menjaga integritas tes." },
+  { icon: <Bolt />, color: "green", title: "Hasil Ujian Real-time", text: "Skor dikalkulasi otomatis dan ditampilkan seketika lengkap dengan breakdown per seksi." },
+  { icon: <Devices />, color: "orange", title: "Responsif & Ringan", text: "Antarmuka ujian nyaman digunakan di laptop, tablet, hingga smartphone." },
+];
+const programs = [
+  { icon: <School />, tone: "navy", label: "TOEFL ITP", title: "TOEFL ITP Prediction", text: "Simulasi format TOEFL ITP untuk kebutuhan kelulusan dan beasiswa dalam negeri.", items: ["140 Soal / 115 Menit", "Sertifikat Prediksi Instan"] },
+  { icon: <Headphones />, tone: "cyan", label: "TOEFL iBT", title: "TOEFL iBT Simulation", text: "Tes komprehensif untuk mengukur Reading, Listening, Speaking, dan Writing.", items: ["AI Scoring Speaking/Writing", "Format Ujian Terbaru"] },
+  { icon: <Verified />, tone: "indigo", label: "General English", title: "Placement Test", text: "Ukur level Bahasa Inggris berdasarkan standar CEFR, dari A1 hingga C2.", items: ["Grammar & Vocabulary Focus", "Durasi 45 Menit"] },
+];
+const faqs = [
+  ["Apakah sertifikat dari SIUJI diakui secara resmi?", "Sertifikat yang kami terbitkan adalah sertifikat prediksi yang dapat digunakan sesuai kebutuhan instansi. Setiap sertifikat dilengkapi QR Code untuk mengecek keasliannya."],
+  ["Alat apa saja yang dibutuhkan untuk mengikuti ujian?", "Anda membutuhkan Laptop/PC atau smartphone, koneksi internet stabil, earphone untuk seksi Listening, dan browser terbaru seperti Google Chrome."],
+  ["Bagaimana jika koneksi internet terputus di tengah tes?", "Sistem SIUJI menyimpan jawaban Anda secara berkala. Login kembali untuk melanjutkan ujian dari soal terakhir selama waktu tes masih tersedia."],
+  ["Berapa lama masa berlaku sertifikat prediksi?", "Sertifikat prediksi TOEFL ITP dari SIUJI berlaku selama satu tahun sejak tanggal diterbitkan."],
+];
+
+function SectionHeading({ eyebrow, title, text, light = false }) {
+  return <div className={`section-heading reveal ${light ? "light" : ""}`}><span>{eyebrow}</span><h2>{title}</h2>{text && <p>{text}</p>}</div>;
+}
+SectionHeading.propTypes = { eyebrow: PropTypes.string, title: PropTypes.string.isRequired, text: PropTypes.string, light: PropTypes.bool };
 
 function LandingPage() {
-  return (
-    <PageLayout background="white">
-      {/* ── Navbar ── */}
-      <SoftBox
-        position="absolute"
-        top={0}
-        left={0}
-        width="100%"
-        zIndex={3}
-        px={3}
-        py={2}
-      >
-        <Container>
-          <SoftBox display="flex" justifyContent="space-between" alignItems="center">
-            <SoftTypography variant="h5" fontWeight="bold" color="dark">
-              SIUJI
-            </SoftTypography>
-            <SoftBox display="flex" gap={2}>
-              <SoftButton
-                component={Link}
-                to="/authentication/sign-in/basic"
-                variant="gradient"
-                color="info"
-                size="small"
-              >
-                Masuk / Login
-              </SoftButton>
-            </SoftBox>
-          </SoftBox>
-        </Container>
-      </SoftBox>
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [openFaq, setOpenFaq] = useState(null);
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll);
+    const observer = new IntersectionObserver((entries) => entries.forEach((entry) => entry.isIntersecting && entry.target.classList.add("active")), { threshold: 0.12 });
+    document.querySelectorAll(".reveal").forEach((element) => observer.observe(element));
+    return () => { window.removeEventListener("scroll", onScroll); observer.disconnect(); };
+  }, []);
+  const closeMenu = () => setMenuOpen(false);
+  const menuItems = ["fitur", "program", "cara-kerja", "harga", "faq"];
+  const label = (item) => item.replace("cara-kerja", "Cara Kerja").replace(/^./, (c) => c.toUpperCase());
 
-      {/* ── Hero Section ── */}
-      <SoftBox
-        minHeight="100vh"
-        width="100%"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        sx={{
-          background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
-          position: "relative",
-          overflow: "hidden"
-        }}
-      >
-        {/* Decorative Shapes */}
-        <SoftBox
-          position="absolute"
-          top="-10%"
-          right="-5%"
-          width="50%"
-          height="70%"
-          borderRadius="50%"
-          sx={{ background: "rgba(33, 150, 243, 0.05)", filter: "blur(60px)" }}
-        />
-        <SoftBox
-          position="absolute"
-          bottom="-10%"
-          left="-5%"
-          width="40%"
-          height="60%"
-          borderRadius="50%"
-          sx={{ background: "rgba(233, 30, 99, 0.05)", filter: "blur(60px)" }}
-        />
-
-        <Container position="relative" zIndex={2}>
-          <Grid container spacing={3} alignItems="center">
-            <Grid item xs={12} lg={6}>
-              <SoftBox mb={3}>
-                <SoftTypography
-                  variant="h1"
-                  fontWeight="bold"
-                  color="dark"
-                  textGradient={false}
-                  sx={{
-                    fontSize: { xs: "2.5rem", md: "3.5rem" },
-                    lineHeight: 1.2,
-                    mb: 2,
-                  }}
-                >
-                  Platform Ujian <br />
-                  <SoftTypography
-                    component="span"
-                    variant="h1"
-                    color="info"
-                    textGradient
-                    sx={{ fontSize: "inherit" }}
-                  >
-                    Digital & Terpercaya
-                  </SoftTypography>
-                </SoftTypography>
-                <SoftTypography variant="body1" color="text" mb={4} pr={{ lg: 5 }}>
-                  Tingkatkan integritas evaluasi Anda dengan antarmuka ujian yang intuitif, cepat, responsif, dan didesain khusus untuk memberikan pengalaman Computer Based Test (CBT) terbaik.
-                </SoftTypography>
-                <SoftBox display="flex" gap={2}>
-                  <SoftButton
-                    component={Link}
-                    to="/authentication/sign-in/basic"
-                    variant="gradient"
-                    color="info"
-                    size="large"
-                  >
-                    Mulai Ujian Sekarang
-                  </SoftButton>
-                </SoftBox>
-              </SoftBox>
-            </Grid>
-            <Grid item xs={12} lg={6} sx={{ display: { xs: "none", lg: "block" } }}>
-              <SoftBox
-                position="relative"
-                width="100%"
-                height="100%"
-                display="flex"
-                justifyContent="center"
-              >
-                {/* Dashboard Mockup Illustration */}
-                <Card
-                  sx={{
-                    width: "90%",
-                    height: "400px",
-                    background: "white",
-                    borderRadius: "xl",
-                    boxShadow: "xl",
-                    overflow: "hidden",
-                    position: "relative",
-                  }}
-                >
-                  <SoftBox p={2} borderBottom="1px solid #eee" display="flex" gap={1}>
-                    <SoftBox width="10px" height="10px" borderRadius="50%" bgColor="error" />
-                    <SoftBox width="10px" height="10px" borderRadius="50%" bgColor="warning" />
-                    <SoftBox width="10px" height="10px" borderRadius="50%" bgColor="success" />
-                  </SoftBox>
-                  <SoftBox p={3}>
-                    <Grid container spacing={2}>
-                      <Grid item xs={4}>
-                        <SoftBox height="100px" borderRadius="lg" bgColor="grey-100" />
-                      </Grid>
-                      <Grid item xs={8}>
-                        <SoftBox height="20px" width="80%" borderRadius="md" bgColor="grey-200" mb={2} />
-                        <SoftBox height="15px" width="60%" borderRadius="md" bgColor="grey-100" mb={1} />
-                        <SoftBox height="15px" width="90%" borderRadius="md" bgColor="grey-100" />
-                      </Grid>
-                    </Grid>
-                    <SoftBox mt={3} height="150px" borderRadius="lg" bgColor="info" opacity={0.1} />
-                  </SoftBox>
-                </Card>
-              </SoftBox>
-            </Grid>
-          </Grid>
-        </Container>
-      </SoftBox>
-
-      {/* ── Features Section ── */}
-      <SoftBox py={8} bgColor="white">
-        <Container>
-          <SoftBox textAlign="center" mb={6}>
-            <SoftTypography variant="h2" fontWeight="bold" color="dark" mb={2}>
-              Mengapa Memilih SIUJI?
-            </SoftTypography>
-            <SoftTypography variant="body2" color="text">
-              Platform modern yang dibangun untuk menunjang segala kebutuhan tes dan evaluasi berskala besar.
-            </SoftTypography>
-          </SoftBox>
-
-          <Grid container spacing={4}>
-            <Grid item xs={12} md={4}>
-              <Card sx={{ p: 4, height: "100%", textAlign: "center", boxShadow: "md" }}>
-                <SoftBox
-                  width="64px"
-                  height="64px"
-                  mx="auto"
-                  mb={3}
-                  borderRadius="lg"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  bgColor="info"
-                  variant="gradient"
-                >
-                  <Icon sx={{ color: "white", fontSize: "2rem !important" }}>security</Icon>
-                </SoftBox>
-                <SoftTypography variant="h5" fontWeight="bold" mb={2}>
-                  Keamanan Tinggi
-                </SoftTypography>
-                <SoftTypography variant="body2" color="text">
-                  Dilengkapi fitur pencegahan kecurangan, token sesi ujian, dan keamanan data peserta terenkripsi penuh.
-                </SoftTypography>
-              </Card>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Card sx={{ p: 4, height: "100%", textAlign: "center", boxShadow: "md" }}>
-                <SoftBox
-                  width="64px"
-                  height="64px"
-                  mx="auto"
-                  mb={3}
-                  borderRadius="lg"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  bgColor="success"
-                  variant="gradient"
-                >
-                  <Icon sx={{ color: "white", fontSize: "2rem !important" }}>speed</Icon>
-                </SoftBox>
-                <SoftTypography variant="h5" fontWeight="bold" mb={2}>
-                  Hasil Real-time
-                </SoftTypography>
-                <SoftTypography variant="body2" color="text">
-                  Penilaian dikalkulasi secara instan setelah peserta menyelesaikan ujian, lengkap dengan fitur konversi nilai.
-                </SoftTypography>
-              </Card>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Card sx={{ p: 4, height: "100%", textAlign: "center", boxShadow: "md" }}>
-                <SoftBox
-                  width="64px"
-                  height="64px"
-                  mx="auto"
-                  mb={3}
-                  borderRadius="lg"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  bgColor="warning"
-                  variant="gradient"
-                >
-                  <Icon sx={{ color: "white", fontSize: "2rem !important" }}>devices</Icon>
-                </SoftBox>
-                <SoftTypography variant="h5" fontWeight="bold" mb={2}>
-                  Responsif & Ringan
-                </SoftTypography>
-                <SoftTypography variant="body2" color="text">
-                  Antarmuka yang dioptimalkan untuk berbagai perangkat. Ujian dapat dikerjakan lancar di desktop, tablet, maupun ponsel.
-                </SoftTypography>
-              </Card>
-            </Grid>
-          </Grid>
-        </Container>
-      </SoftBox>
-
-      {/* ── Footer ── */}
-      <SoftBox py={4} bgColor="light">
-        <Container>
-          <SoftBox display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap">
-            <SoftTypography variant="body2" color="secondary">
-              &copy; {new Date().getFullYear()} SIUJI Platform. All rights reserved.
-            </SoftTypography>
-            <SoftBox display="flex" gap={2}>
-              <SoftTypography component="a" href="#" variant="body2" color="secondary">
-                Bantuan
-              </SoftTypography>
-              <SoftTypography component="a" href="#" variant="body2" color="secondary">
-                Privasi
-              </SoftTypography>
-            </SoftBox>
-          </SoftBox>
-        </Container>
-      </SoftBox>
-    </PageLayout>
-  );
+  return <PageLayout background="white">
+    <nav className={`landing-nav ${scrolled ? "scrolled" : ""}`}><div className="landing-container nav-inner"><a className="brand" href="#top"><School /> SIUJI</a><div className="desktop-links">{menuItems.map((item) => <a key={item} href={`#${item}`}>{label(item)}</a>)}</div><Link className="button button-primary nav-cta" to={loginPath}>Masuk / Login</Link><button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Buka menu">{menuOpen ? <Close /> : <Menu />}</button></div>{menuOpen && <div className="mobile-links">{menuItems.map((item) => <a key={item} href={`#${item}`} onClick={closeMenu}>{label(item)}</a>)}<Link className="button button-primary" to={loginPath}>Masuk / Login</Link></div>}</nav>
+    <main id="top">
+      <section className="hero-section"><div className="hero-blob" /><div className="landing-container hero-grid"><div className="hero-copy reveal active"><div className="eyebrow-pill"><span /> Platform Ujian No. 1 di Indonesia</div><h1>Ujian Digital & Terpercaya untuk <em>TOEFL & Bahasa Inggris</em></h1><p>Tingkatkan persiapan dan integritas sertifikasi Anda dengan antarmuka simulasi CBT yang dirancang presisi, aman, dan berstandar internasional.</p><div className="hero-actions"><a className="button button-primary" href="#program">Mulai Ujian Sekarang <ArrowForward /></a><a className="button button-secondary" href="#cara-kerja">Lihat Cara Kerja</a></div><div className="participant-count"><div className="avatars"><span>U1</span><span>U2</span><span>U3</span></div><p>Bergabung dengan <strong>10,000+</strong> peserta lainnya.</p></div></div><div className="hero-visual reveal active"><div className="mockup-float"><div className="exam-mockup"><div className="mockup-header"><strong>TOEFL ITP Simulation</strong><span><AccessTime /> 01:45:20</span></div><div className="mockup-body"><b>Section 2: Structure and Written Expression</b><div className="skeleton question"><i /><i /><i /></div>{["w-50", "w-66", "w-33"].map((width, index) => <div className={`option ${index === 0 ? "selected" : ""}`} key={width}><span className="radio" /><i className={width} /></div>)}<div className="mockup-footer"><i /><button /></div></div></div></div></div></div></section>
+      <section id="fitur" className="section"><div className="landing-container"><SectionHeading eyebrow="Mengapa Memilih Kami" title="Fitur Unggulan SIUJI" text="Dirancang dengan teknologi terkini untuk memastikan pengalaman ujian yang lancar, aman, dan akurat." /><div className="feature-grid">{features.map((feature, index) => <article className={`feature-card reveal delay-${index}`} key={feature.title}><div className={`feature-icon ${feature.color}`}>{feature.icon}</div><h3>{feature.title}</h3><p>{feature.text}</p></article>)}</div></div></section>
+      <section id="program" className="section section-muted"><div className="landing-container"><SectionHeading eyebrow="Program Ujian" title="Pilih Ujian yang Sesuai" text="Tersedia berbagai format ujian Bahasa Inggris standar internasional untuk kebutuhan akademik maupun karier." /><div className="program-grid">{programs.map((program, index) => <article className={`program-card reveal delay-${index}`} key={program.title}><div className={`program-banner ${program.tone}`}>{program.icon}<strong>{program.label}</strong></div><div className="program-content"><h3>{program.title}</h3><p>{program.text}</p><ul>{program.items.map((item) => <li key={item}><Check /> {item}</li>)}</ul><Link to={loginPath}>Lihat Detail <ArrowForward /></Link></div></article>)}</div></div></section>
+      <section id="cara-kerja" className="section"><div className="landing-container"><SectionHeading title="Cara Memulai Ujian" text="Proses pendaftaran hingga sertifikasi dalam 4 langkah mudah." /><div className="steps">{[["Daftar Akun", "Buat akun SIUJI secara gratis dan lengkapi profil Anda."], ["Pilih Jadwal", "Pilih jenis ujian dan jadwal yang sesuai dengan waktu Anda."], ["Kerjakan Ujian", "Akses ujian melalui platform CBT pintar kami dari mana saja."], ["Sertifikat", "Unduh e-sertifikat dengan QR code verifikasi langsung."]].map(([title, text], index) => <div className={`step reveal delay-${index}`} key={title}><div className="step-number">{index + 1}</div><h3>{title}</h3><p>{text}</p></div>)}</div></div></section>
+      <section id="harga" className="section pricing-section"><div className="landing-container"><SectionHeading eyebrow="Harga Transparan" title="Investasi Untuk Masa Depan" text="Pilih paket yang paling sesuai dengan kebutuhan persiapan Anda." light /><div className="pricing-grid">{[["Basic (Trial)", "Untuk pemula yang ingin mencoba.", "Gratis", ["1x Simulasi Ujian Singkat", "Skor Total Saja", "Tidak ada Sertifikat", "Pembahasan Dibatasi"]], ["Pro (Individu)", "Untuk persiapan serius dan sertifikasi.", "Rp 150.000", ["Simulasi Full (Sesuai Asli)", "Analitik Kelemahan Lengkap", "E-Sertifikat Terverifikasi", "Pembahasan Soal Detail"]], ["Institusi", "Solusi untuk sekolah, kampus, & perusahaan.", "Custom", ["Akses Ujian Massal (>50)", "Dashboard Admin Khusus", "Laporan Agregat Peserta", "White-label Logo Institusi"]]].map(([title, desc, price, items], index) => <article className={`price-card ${index === 1 ? "featured" : ""} reveal delay-${index}`} key={title}>{index === 1 && <span className="popular">Terpopuler</span>}<h3>{title}</h3><p>{desc}</p><strong className="price">{price}</strong>{index === 1 && <small>/ 1x Ujian Penuh</small>}<ul>{items.map((item) => <li key={item}><Check /> {item}</li>)}</ul><Link className={`button ${index === 1 ? "button-white" : "button-dark"}`} to={loginPath}>{index === 0 ? "Coba Gratis" : index === 1 ? "Beli Paket Pro" : "Hubungi Sales"}</Link></article>)}</div></div></section>
+      <section className="section testimonial-section"><div className="landing-container"><SectionHeading title="Cerita Sukses Peserta" text="Bagaimana SIUJI membantu mereka mencapai target." /><div className="testimonial-grid">{[["A", "Andi Setiawan", "Mahasiswa, Target Skor 550", "Antarmuka ujiannya sangat mirip dengan tes aslinya. Analitik per section membuat saya tahu kelemahan di bagian Structure."], ["N", "Nadia Putri", "Job Seeker", "Sistemnya ringan, tidak lag walaupun internet sempat lambat. Sertifikat langsung jadi setelah tes selesai."], ["D", "Dr. Budi Santoso", "Dosen & Koordinator Bahasa", "Dashboard institusi SIUJI sangat memudahkan rekap nilai. Sistem anti-cheatnya juga berjalan sangat baik."]].map(([initial, name, role, quote], index) => <article className={`testimonial reveal delay-${index}`} key={name}><div className="stars">{[1, 2, 3, 4, 5].map((star) => <Star key={star} />)}</div><p>“{quote}”</p><div className="person"><span>{initial}</span><div><strong>{name}</strong><small>{role}</small></div></div></article>)}</div></div></section>
+      <section id="faq" className="section faq-section"><div className="faq-wrap"><SectionHeading title="Pertanyaan Seputar SIUJI" text="Temukan jawaban dari pertanyaan yang sering diajukan." /><div className="faq-list">{faqs.map(([question, answer], index) => <div className="faq-item reveal" key={question}><button onClick={() => setOpenFaq(openFaq === index ? null : index)}><span>{question}</span><KeyboardArrowDown className={openFaq === index ? "rotated" : ""} /></button>{openFaq === index && <div className="faq-answer">{answer}</div>}</div>)}</div></div></section>
+    </main>
+    <footer className="landing-footer"><div className="landing-container footer-grid"><div><a className="brand footer-brand" href="#top"><School /> SIUJI</a><p>Platform ujian Computer Based Test modern untuk sertifikasi TOEFL dan Bahasa Inggris di Indonesia.</p><div className="socials"><a href="#top"><Instagram /></a><a href="#top"><Twitter /></a><a href="#top"><LinkedIn /></a></div></div><div><h4>Program</h4><a href="#program">TOEFL ITP Prediction</a><a href="#program">TOEFL iBT Simulation</a><a href="#program">General English</a><a href="#program">Tes Institusi</a></div><div><h4>Perusahaan</h4><a href="#top">Tentang Kami</a><a href="#top">Karier</a><a href="#top">Blog & Tips Ujian</a><a href="#top">Kontak</a></div><div><h4>Hubungi Kami</h4><p><Email /> support@siuji.id</p><p><Twitter /> +62 811-2233-4455</p><p><LocationOn /> Jakarta Selatan</p></div></div><div className="footer-bottom landing-container"><span>© {new Date().getFullYear()} SIUJI Platform. Hak Cipta Dilindungi.</span><span>Syarat & Ketentuan &nbsp; · &nbsp; Kebijakan Privasi</span></div></footer>
+  </PageLayout>;
 }
-
 export default LandingPage;
